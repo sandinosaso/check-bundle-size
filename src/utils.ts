@@ -120,6 +120,13 @@ const sizeCheck = async (
   )
 
   try {
+    console.log(
+      'octokit.checks.create with context.payload.repository, checkName, context.payload.sha:',
+      context.payload.repository,
+      checkName,
+      context.payload.sha
+    )
+
     check = await octokit.checks.create({
       owner: context.payload.repository.owner,
       repo: context.payload.repository.repo,
