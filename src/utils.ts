@@ -18,20 +18,20 @@ import globby from 'globby'
  */
 const prFiles = async (octokit: any, context: any): Promise<string[]> => {
   const pr = await octokit.repos.listPullRequestsAssociatedWithCommit({
-    owner: context.repo.owner,
-    repo: context.repo.repo,
-    commit_sha: context.sha
+    owner: context.payload.repository.owner,
+    repo: context.payload.repository.repo,
+    commit_sha: context.payload.sha
   })
 
-  console.log('Got pr associated with this commit with context', context, pr)
+  console.log('Got pr associated with this commit with context.payload.repository, pr', context.payload.repository, pr)
 
   if (pr.data.length === 0) {
-    throw new Error(`no PRs associated with commit ${context.sha}`)
+    throw new Error(`no PRs associated with commit ${context.payload.sha}`)
   }
 
   const pullRequestFiles = await octokit.pulls.listFiles({
-    owner: context.repo.owner,
-    repo: context.repo.repo,
+    owner: context.payload.repository.owner,
+    repo: context.payload.repository.repo,
     pull_number: pr.data[0].number
   })
 
@@ -117,10 +117,10 @@ const sizeCheck = async (
 
   try {
     check = await octokit.checks.create({
-      owner: context.repo.owner,
-      repo: context.repo.repo,
+      owner: context.payload.repository.owner,
+      repo: context.payload.repository.repo,
       name: checkName,
-      head_sha: context.sha,
+      head_sha: context.payload.sha,
       status: 'in_progress'
     })
 
@@ -138,8 +138,8 @@ const sizeCheck = async (
     const parts = out.stdout.split('\n')
     const title = parts[2]
     await octokit.checks.update({
-      owner: context.repo.owner,
-      repo: context.repo.repo,
+      owner: context.payload.repository.owner,
+      repo: context.payload.repository.repo,
       check_run_id: check.data.id,
       conclusion: 'success',
       output: {
@@ -160,8 +160,8 @@ const sizeCheck = async (
       )
   } catch (err) {
     await octokit.checks.update({
-      owner: context.repo.owner,
-      repo: context.repo.repo,
+      owner: context.payload.repository.owner,
+      repo: context.payload.repository.repo,
       check_run_id: check.data.id,
       conclusion: 'failure',
       output: {
