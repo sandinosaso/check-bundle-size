@@ -18050,7 +18050,9 @@ const gzipSize = (filePath) => __awaiter(void 0, void 0, void 0, function* () {
     });
 });
 const getBundleSizeDiff = () => __awaiter(void 0, void 0, void 0, function* () {
-    const statsFileJson = fs_extra_1.default.readFileSync(path_1.default.join(process.cwd(), 'dist/stats.json')).toString();
+    const statsFileJson = fs_extra_1.default
+        .readFileSync(path_1.default.join(process.cwd(), 'dist/stats.json'))
+        .toString();
     const stats = JSON.parse(statsFileJson);
     const gzip = yield gzipSize(path_1.default.join(stats.outputPath, stats.assets[0].name));
     const maxsize = 100; // bytes(config.bundlesize.maxSize)
@@ -18088,7 +18090,7 @@ const sizeCheck = (core, octokit, context, baseDir) => __awaiter(void 0, void 0,
             cwd: baseDir,
             localDir: '.',
             preferLocal: true,
-            env: { CI: "true" }
+            env: { CI: 'true' }
         });
         console.log('Size check for:', pkgName);
         console.log(out.stdout);
