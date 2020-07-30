@@ -17791,20 +17791,21 @@ const sizeCheck = (core, octokit, context, baseDir) => __awaiter(void 0, void 0,
         const { diff, summary } = yield getBundleSizeDiff();
         // const parts = out.stdout.split('\n')
         // const title = parts[2]
-        yield octokit.checks.update({
+        const checkupdate = yield octokit.checks.update({
             owner: context.payload.repository.owner.login,
             repo: context.payload.repository.name,
             check_run_id: check.data.id,
             conclusion: 'success',
             output: {
                 title: diff > 0 ? 'Error' : 'Success',
-                summary,
+                summary
             }
         });
+        console.log('octokit.checks.update returned:', checkupdate);
         yield artifact
             .create()
             .uploadArtifact(`${pkgName}-size`, yield globby_1.default(['dist/*'], { cwd: baseDir, absolute: true }), baseDir, {
-            continueOnError: true
+            continueOnError: false
         });
     }
     catch (err) {

@@ -168,7 +168,7 @@ const sizeCheck = async (
 
     // const parts = out.stdout.split('\n')
     // const title = parts[2]
-    await octokit.checks.update({
+    const checkupdate = await octokit.checks.update({
       owner: context.payload.repository.owner.login,
       repo: context.payload.repository.name,
       check_run_id: check.data.id,
@@ -179,6 +179,8 @@ const sizeCheck = async (
       }
     })
 
+    console.log('octokit.checks.update returned:', checkupdate)
+
     await artifact
       .create()
       .uploadArtifact(
@@ -186,7 +188,7 @@ const sizeCheck = async (
         await globby(['dist/*'], {cwd: baseDir, absolute: true}),
         baseDir,
         {
-          continueOnError: true
+          continueOnError: false
         }
       )
   } catch (err) {
