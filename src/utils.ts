@@ -23,7 +23,11 @@ const prFiles = async (octokit: any, context: any): Promise<string[]> => {
     commit_sha: context.sha
   })
 
-  if (pr.data.length === 0) {
+  console.log(
+    'Got pr associated with this commit with context', context, pr
+  )
+
+  if (pr?.data?.length === 0) {
     throw new Error(`no PRs associated with commit ${context.sha}`)
   }
 
