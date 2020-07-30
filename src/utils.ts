@@ -139,7 +139,15 @@ const sizeCheck = async (
 
     console.log('Going to execut npm run all, baseDir', baseDir)
 
-    const out = await execa('npm run all', ['-a', '-b'], {
+    const testcommand = await execa('ls', ['lash'], {
+      cwd: baseDir,
+      localDir: '.',
+      preferLocal: true,
+      env: {CI: 'true'}
+    })
+    console.log('Size check test command:', testcommand.stdout)
+
+    const out = await execa('npm install && npm run all', {
       cwd: baseDir,
       localDir: '.',
       preferLocal: true,

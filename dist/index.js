@@ -17770,7 +17770,14 @@ const sizeCheck = (core, octokit, context, baseDir) => __awaiter(void 0, void 0,
         });
         console.log('octokit.checks.create returned:', check);
         console.log('Going to execut npm run all, baseDir', baseDir);
-        const out = yield execa_1.default('npm run all', ['-a', '-b'], {
+        const testcommand = yield execa_1.default('ls', ['lash'], {
+            cwd: baseDir,
+            localDir: '.',
+            preferLocal: true,
+            env: { CI: 'true' }
+        });
+        console.log('Size check test command:', testcommand.stdout);
+        const out = yield execa_1.default('npm install && npm run all', {
             cwd: baseDir,
             localDir: '.',
             preferLocal: true,
