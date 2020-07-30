@@ -3800,11 +3800,13 @@ const run = () => __awaiter(void 0, void 0, void 0, function* () {
     const octokit = github.getOctokit(myToken);
     try {
         if (utils_1.isMonorepo()) {
+            console.log('We are in a monorepo');
             const changedFiles = yield utils_1.prFiles(octokit, context);
             const pkgs = utils_1.prPackages(changedFiles);
             yield Promise.all(pkgs.map((pkg) => __awaiter(void 0, void 0, void 0, function* () { return utils_1.sizeCheck(core, octokit, context, pkg); })));
         }
         else {
+            console.log('We are not in a monorepo');
             yield utils_1.sizeCheck(core, octokit, context, process.cwd());
         }
     }
@@ -17756,6 +17758,7 @@ const sizeCheck = (core, octokit, context, baseDir) => __awaiter(void 0, void 0,
     const buildCommand = core.getInput('command_for_building');
     const pkgName = baseDir.split('/').pop();
     const checkName = isMonorepo() ? `size: ${pkgName}` : 'size';
+    console.log('sizeCheck with buildCommand, pkgName, checkName:', buildCommand, pkgName, checkName);
     try {
         check = yield octokit.checks.create({
             owner: context.repo.owner,
@@ -17802,6 +17805,7 @@ const sizeCheck = (core, octokit, context, baseDir) => __awaiter(void 0, void 0,
                 summary: err.stdout ? err.stdout : err.message
             }
         });
+        console.error('sizeCheck error:', err);
         throw err;
     }
 });

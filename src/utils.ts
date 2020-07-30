@@ -108,6 +108,13 @@ const sizeCheck = async (
   const pkgName = baseDir.split('/').pop()
   const checkName = isMonorepo() ? `size: ${pkgName}` : 'size'
 
+  console.log(
+    'sizeCheck with buildCommand, pkgName, checkName:',
+    buildCommand,
+    pkgName,
+    checkName
+  )
+
   try {
     check = await octokit.checks.create({
       owner: context.repo.owner,
@@ -162,6 +169,8 @@ const sizeCheck = async (
         summary: err.stdout ? err.stdout : err.message
       }
     })
+
+    console.error('sizeCheck error:', err)
     throw err
   }
 }

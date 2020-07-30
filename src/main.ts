@@ -16,6 +16,7 @@ const run = async (): Promise<void> => {
 
   try {
     if (isMonorepo()) {
+      console.log('We are in a monorepo')
       const changedFiles = await prFiles(octokit, context)
       const pkgs = prPackages(changedFiles)
 
@@ -23,6 +24,7 @@ const run = async (): Promise<void> => {
         pkgs.map(async (pkg: string) => sizeCheck(core, octokit, context, pkg))
       )
     } else {
+      console.log('We are not in a monorepo')
       await sizeCheck(core, octokit, context, process.cwd())
     }
   } catch (err) {
