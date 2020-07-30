@@ -17737,6 +17737,7 @@ const getBundleSizeDiff = () => __awaiter(void 0, void 0, void 0, function* () {
     const gzip = yield gzipSize(path_1.default.join(stats.outputPath, stats.assets[0].name));
     const maxsize = 100; // bytes(config.bundlesize.maxSize)
     const diff = gzip - maxsize;
+    console.log('statsFileJson:', statsFileJson);
     console.log('Use http://webpack.github.io/analyse/ to load "./dist/stats.json".');
     // console.log(`Check previous sizes in https://bundlephobia.com/result?p=${pkg.name}@${pkg.version}`)
     if (diff > 0) {
@@ -17745,6 +17746,7 @@ const getBundleSizeDiff = () => __awaiter(void 0, void 0, void 0, function* () {
     else {
         console.log(`${bytes_1.default(gzip)} (▼${bytes_1.default(diff)} / ${bytes_1.default(maxsize)})`);
     }
+    return diff;
 });
 /**
  * Bundle Size Check
@@ -17770,20 +17772,20 @@ const sizeCheck = (core, octokit, context, baseDir) => __awaiter(void 0, void 0,
         });
         console.log('octokit.checks.create returned:', check);
         console.log('Going to execut npm run all, baseDir', baseDir);
-        const testcommand = yield execa_1.default('ls', ['-lash'], {
+        const testcommand = yield execa_1.default('ls dist', ['-lash'], {
             cwd: baseDir,
             localDir: '.',
             preferLocal: true,
             env: { CI: 'true' }
         });
         console.log('Size check test command:', testcommand.stdout);
-        const out = yield execa_1.default('npm install && npm run all', {
+        const out = yield execa_1.default('npm install', {
             cwd: baseDir,
             localDir: '.',
             preferLocal: true,
             env: { CI: 'true' }
         });
-        console.log('Size check for:', pkgName);
+        console.log('npm install result:', out.stdout);
         console.log(out.stdout);
         yield getBundleSizeDiff();
         const parts = out.stdout.split('\n');

@@ -73,7 +73,7 @@ const gzipSize = async (filePath: string): Promise<number> => {
   })
 }
 
-const getBundleSizeDiff = async (): Promise<void> => {
+const getBundleSizeDiff = async (): Promise<number> => {
   const statsFileJson: string = fs
     .readFileSync(path.join(process.cwd(), 'dist/stats.json'))
     .toString()
@@ -81,6 +81,8 @@ const getBundleSizeDiff = async (): Promise<void> => {
   const gzip = await gzipSize(path.join(stats.outputPath, stats.assets[0].name))
   const maxsize = 100 // bytes(config.bundlesize.maxSize)
   const diff = gzip - maxsize
+
+  console.log('statsFileJson:', statsFileJson)
 
   console.log(
     'Use http://webpack.github.io/analyse/ to load "./dist/stats.json".'
@@ -92,6 +94,8 @@ const getBundleSizeDiff = async (): Promise<void> => {
   } else {
     console.log(`${bytes(gzip)} (▼${bytes(diff)} / ${bytes(maxsize)})`)
   }
+
+  return diff
 }
 
 /**
@@ -139,7 +143,7 @@ const sizeCheck = async (
 
     console.log('Going to execut npm run all, baseDir', baseDir)
 
-    const testcommand = await execa('ls', ['-lash'], {
+    const testcommand = await execa('ls dist', ['-lash'], {
       cwd: baseDir,
       localDir: '.',
       preferLocal: true,
@@ -147,13 +151,13 @@ const sizeCheck = async (
     })
     console.log('Size check test command:', testcommand.stdout)
 
-    const out = await execa('npm install && npm run all', {
+    const out = await execa('npm install', {
       cwd: baseDir,
       localDir: '.',
       preferLocal: true,
       env: {CI: 'true'}
     })
-    console.log('Size check for:', pkgName)
+    console.log('npm install result:', out.stdout)
     console.log(out.stdout)
 
     await getBundleSizeDiff()
