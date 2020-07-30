@@ -17740,13 +17740,14 @@ const getBundleSizeDiff = () => __awaiter(void 0, void 0, void 0, function* () {
     console.log('statsFileJson:', statsFileJson);
     console.log('Use http://webpack.github.io/analyse/ to load "./dist/stats.json".');
     // console.log(`Check previous sizes in https://bundlephobia.com/result?p=${pkg.name}@${pkg.version}`)
+    let summary = '';
     if (diff > 0) {
-        throw new Error(`${bytes_1.default(gzip)} (▲${bytes_1.default(diff)} / ${bytes_1.default(maxsize)})`);
+        summary = `${bytes_1.default(gzip)} (▲${bytes_1.default(diff)} / ${bytes_1.default(maxsize)})`;
     }
     else {
-        console.log(`${bytes_1.default(gzip)} (▼${bytes_1.default(diff)} / ${bytes_1.default(maxsize)})`);
+        summary = `${bytes_1.default(gzip)} (▼${bytes_1.default(diff)} / ${bytes_1.default(maxsize)})`;
     }
-    return diff;
+    return { diff, summary };
 });
 /**
  * Bundle Size Check
@@ -17772,32 +17773,32 @@ const sizeCheck = (core, octokit, context, baseDir) => __awaiter(void 0, void 0,
         });
         console.log('octokit.checks.create returned:', check);
         console.log('Going to execut npm run all, baseDir', baseDir);
-        const testcommand = yield execa_1.default('ls dist', ['-lash'], {
+        const testcommand = yield execa_1.default('ls', ['-lash', 'dist'], {
             cwd: baseDir,
             localDir: '.',
             preferLocal: true,
             env: { CI: 'true' }
         });
         console.log('Size check test command:', testcommand.stdout);
-        const out = yield execa_1.default('npm install', {
-            cwd: baseDir,
-            localDir: '.',
-            preferLocal: true,
-            env: { CI: 'true' }
-        });
-        console.log('npm install result:', out.stdout);
-        console.log(out.stdout);
-        yield getBundleSizeDiff();
-        const parts = out.stdout.split('\n');
-        const title = parts[2];
+        // const out = await execa('npm install', {
+        //   cwd: baseDir,
+        //   localDir: '.',
+        //   preferLocal: true,
+        //   env: {CI: 'true'}
+        // })
+        // console.log('npm install result:', out.stdout)
+        // console.log(out.stdout)
+        const { diff, summary } = yield getBundleSizeDiff();
+        // const parts = out.stdout.split('\n')
+        // const title = parts[2]
         yield octokit.checks.update({
             owner: context.payload.repository.owner.login,
             repo: context.payload.repository.name,
             check_run_id: check.data.id,
             conclusion: 'success',
             output: {
-                title,
-                summary: [parts[0], parts[1]].join('\n')
+                title: diff > 0 ? 'Error' : 'Success',
+                summary,
             }
         });
         yield artifact

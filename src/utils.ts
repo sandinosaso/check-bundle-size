@@ -73,7 +73,10 @@ const gzipSize = async (filePath: string): Promise<number> => {
   })
 }
 
-const getBundleSizeDiff = async (): Promise<number> => {
+const getBundleSizeDiff = async (): Promise<{
+  diff: number
+  summary: string
+}> => {
   const statsFileJson: string = fs
     .readFileSync(path.join(process.cwd(), 'dist/stats.json'))
     .toString()
@@ -89,13 +92,14 @@ const getBundleSizeDiff = async (): Promise<number> => {
   )
   // console.log(`Check previous sizes in https://bundlephobia.com/result?p=${pkg.name}@${pkg.version}`)
 
+  let summary = ''
   if (diff > 0) {
-    throw new Error(`${bytes(gzip)} (▲${bytes(diff)} / ${bytes(maxsize)})`)
+    summary = `${bytes(gzip)} (▲${bytes(diff)} / ${bytes(maxsize)})`
   } else {
-    console.log(`${bytes(gzip)} (▼${bytes(diff)} / ${bytes(maxsize)})`)
+    summary = `${bytes(gzip)} (▼${bytes(diff)} / ${bytes(maxsize)})`
   }
 
-  return diff
+  return {diff, summary}
 }
 
 /**
@@ -143,7 +147,7 @@ const sizeCheck = async (
 
     console.log('Going to execut npm run all, baseDir', baseDir)
 
-    const testcommand = await execa('ls dist', ['-lash'], {
+    const testcommand = await execa('ls', ['-lash', 'dist'], {
       cwd: baseDir,
       localDir: '.',
       preferLocal: true,
@@ -151,27 +155,27 @@ const sizeCheck = async (
     })
     console.log('Size check test command:', testcommand.stdout)
 
-    const out = await execa('npm install', {
-      cwd: baseDir,
-      localDir: '.',
-      preferLocal: true,
-      env: {CI: 'true'}
-    })
-    console.log('npm install result:', out.stdout)
-    console.log(out.stdout)
+    // const out = await execa('npm install', {
+    //   cwd: baseDir,
+    //   localDir: '.',
+    //   preferLocal: true,
+    //   env: {CI: 'true'}
+    // })
+    // console.log('npm install result:', out.stdout)
+    // console.log(out.stdout)
 
-    await getBundleSizeDiff()
+    const {diff, summary} = await getBundleSizeDiff()
 
-    const parts = out.stdout.split('\n')
-    const title = parts[2]
+    // const parts = out.stdout.split('\n')
+    // const title = parts[2]
     await octokit.checks.update({
       owner: context.payload.repository.owner.login,
       repo: context.payload.repository.name,
       check_run_id: check.data.id,
       conclusion: 'success',
       output: {
-        title,
-        summary: [parts[0], parts[1]].join('\n')
+        title: diff > 0 ? 'Error' : 'Success',
+        summary
       }
     })
 
