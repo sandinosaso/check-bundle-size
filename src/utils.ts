@@ -5,9 +5,9 @@ import path from 'path'
 import fs from 'fs-extra'
 import bytes from 'bytes'
 import {createGzip} from 'zlib'
-import * as artifact from '@actions/artifact'
+// import * as artifact from '@actions/artifact'
+// import globby from 'globby'
 import execa from 'execa'
-import globby from 'globby'
 
 /**
  * Get files for a PR
@@ -181,16 +181,16 @@ const sizeCheck = async (
 
     console.log('octokit.checks.update returned:', checkupdate)
 
-    await artifact
-      .create()
-      .uploadArtifact(
-        `${pkgName}-size`,
-        await globby(['dist/*'], {cwd: baseDir, absolute: true}),
-        baseDir,
-        {
-          continueOnError: true
-        }
-      )
+    // await artifact
+    //   .create()
+    //   .uploadArtifact(
+    //     `${pkgName}-size`,
+    //     await globby(['dist/*'], {cwd: baseDir, absolute: true}),
+    //     baseDir,
+    //     {
+    //       continueOnError: true
+    //     }
+    //   )
   } catch (err) {
     console.error('sizeCheck error:', err)
     await octokit.checks.update({
