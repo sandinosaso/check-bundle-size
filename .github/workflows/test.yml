@@ -21,4 +21,6 @@ jobs:
       - uses: actions/checkout@v2
       - uses: ./
         with:
+          github_token: "XYZ"
+          command_for_building: "npm run build"
           debug_command: "npm run build"

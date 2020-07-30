@@ -1,11 +1,17 @@
-name: 'Your name here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'Check Bundle Size'
+description: 'Check Bundle size action for monorepos'
+author: 'sandinosaso'
 inputs:
-  milliseconds: # change this
+  github_token:
+    description: The GITHUB_TOKEN secret
     required: true
-    description: 'input description here'
-    default: 'default value if applicable'
+  command_for_building:
+    description: The command to build your project
+    required: true
+    default: 'yarn build'
+  debug_command:
+    description: The command to debug_command 
+    required: false
 runs:
   using: 'node12'
   main: 'dist/index.js'
