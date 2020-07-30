@@ -1,19 +1,29 @@
-import * as core from '@actions/core'
-import {wait} from './wait'
+import * as core from '@actions/core';
+import * as github from '@actions/github';
+const context = github.context;
 
-async function run(): Promise<void> {
+import { prFiles, prPackages, sizeCheck, isMonorepo } from './utils';
+
+const run = async () => {
+  const myToken = core.getInput('github_token');
+
+  const build_command: string = core.getInput('debug_command')
+  core.debug(`Build command ${build_command} ...`);
+
+  const octokit = github.getOctokit(myToken)
+
   try {
-    const ms: string = core.getInput('milliseconds')
-    core.debug(`Waiting ${ms} milliseconds ...`) // debug is only output if you set the secret `ACTIONS_RUNNER_DEBUG` to true
+    if (isMonorepo()) {
+      const changedFiles = await prFiles(octokit, context);
+      const pkgs = prPackages(changedFiles);
 
-    core.debug(new Date().toTimeString())
-    await wait(parseInt(ms, 10))
-    core.debug(new Date().toTimeString())
-
-    core.setOutput('time', new Date().toTimeString())
-  } catch (error) {
-    core.setFailed(error.message)
+      await Promise.all(pkgs.map((pkg: any) => sizeCheck(core, octokit, context, pkg)));
+    } else {
+      await sizeCheck(core, octokit, context, process.cwd());
+    }
+  } catch (err) {
+    core.setFailed(err);
   }
 }
 
-run()
+run();

@@ -25,7 +25,13 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@actions/core": "^1.2.4"
+    "@actions/artifact": "^0.2.0",
+    "@actions/core": "^1.2.4",
+    "@actions/exec": "^1.0.3",
+    "@actions/github": "^4.0.0",
+    "bytes": "^3.1.0",
+    "cosmiconfig": "^6.0.0",
+    "execa": "^4.0.0"
   },
   "devDependencies": {
     "@types/jest": "^26.0.7",
