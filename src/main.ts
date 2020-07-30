@@ -6,7 +6,7 @@ import {prFiles, prPackages, sizeCheck, isMonorepo} from './utils'
 const context = github.context
 
 const run = async (): Promise<void> => {
-  console.log(`running with context ${JSON.stringify(context)} ...`)
+  console.log(`running with context:`, context)
   const myToken = core.getInput('github_token')
 
   const debug_command: string = core.getInput('debug_command')
