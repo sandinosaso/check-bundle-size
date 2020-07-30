@@ -136,6 +136,8 @@ const sizeCheck = async (
       status: 'in_progress'
     })
 
+    console.log('octokit.checks.create returned:', check)
+
     const out = await execa(buildCommand, ['-a', '-b'], {
       cwd: baseDir,
       localDir: '.',
@@ -171,6 +173,7 @@ const sizeCheck = async (
         }
       )
   } catch (err) {
+    console.error('sizeCheck error:', err)
     await octokit.checks.update({
       owner: context.payload.repository.owner,
       repo: context.payload.repository.url,
@@ -182,7 +185,6 @@ const sizeCheck = async (
       }
     })
 
-    console.error('sizeCheck error:', err)
     throw err
   }
 }

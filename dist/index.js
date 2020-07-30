@@ -3793,7 +3793,7 @@ const github = __importStar(__webpack_require__(469));
 const utils_1 = __webpack_require__(611);
 const context = github.context;
 const run = () => __awaiter(void 0, void 0, void 0, function* () {
-    console.log(`running with context:`, context);
+    console.log(`Running check ...`);
     const myToken = core.getInput('github_token');
     const debug_command = core.getInput('debug_command');
     core.debug(`Build command ${debug_command} ...`);
@@ -17768,6 +17768,7 @@ const sizeCheck = (core, octokit, context, baseDir) => __awaiter(void 0, void 0,
             head_sha: context.sha,
             status: 'in_progress'
         });
+        console.log('octokit.checks.create returned:', check);
         const out = yield execa_1.default(buildCommand, ['-a', '-b'], {
             cwd: baseDir,
             localDir: '.',
@@ -17796,6 +17797,7 @@ const sizeCheck = (core, octokit, context, baseDir) => __awaiter(void 0, void 0,
         });
     }
     catch (err) {
+        console.error('sizeCheck error:', err);
         yield octokit.checks.update({
             owner: context.payload.repository.owner,
             repo: context.payload.repository.url,
@@ -17806,7 +17808,6 @@ const sizeCheck = (core, octokit, context, baseDir) => __awaiter(void 0, void 0,
                 summary: err.stdout ? err.stdout : err.message
             }
         });
-        console.error('sizeCheck error:', err);
         throw err;
     }
 });
