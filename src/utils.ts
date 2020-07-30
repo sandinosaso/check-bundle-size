@@ -137,7 +137,9 @@ const sizeCheck = async (
 
     console.log('octokit.checks.create returned:', check)
 
-    const out = await execa(buildCommand, ['-a', '-b'], {
+    console.log('Going to execut npm run all, baseDir', baseDir)
+
+    const out = await execa('npm run all', ['-a', '-b'], {
       cwd: baseDir,
       localDir: '.',
       preferLocal: true,
