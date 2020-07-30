@@ -121,9 +121,8 @@ const sizeCheck = async (
 
   try {
     console.log(
-      'octokit.checks.create with owner, url, checkName, context.sha:',
-      context.payload.repository.owner.login,
-      context.payload.repository.url,
+      'octokit.checks.create with context.payload.repository, context.sha:',
+      context.payload.repository,
       checkName,
       context.sha
     )
