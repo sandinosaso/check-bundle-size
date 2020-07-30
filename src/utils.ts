@@ -18,7 +18,7 @@ import globby from 'globby'
  */
 const prFiles = async (octokit: any, context: any): Promise<string[]> => {
   const pr = await octokit.repos.listPullRequestsAssociatedWithCommit({
-    owner: context.payload.repository.owner,
+    owner: context.payload.repository.owner.login,
     repo: context.payload.repository.url,
     commit_sha: context.sha
   })
@@ -34,7 +34,7 @@ const prFiles = async (octokit: any, context: any): Promise<string[]> => {
   }
 
   const pullRequestFiles = await octokit.pulls.listFiles({
-    owner: context.payload.repository.owner,
+    owner: context.payload.repository.owner.login,
     repo: context.payload.repository.url,
     pull_number: pr.data[0].number
   })
@@ -122,14 +122,14 @@ const sizeCheck = async (
   try {
     console.log(
       'octokit.checks.create with owner, url, checkName, context.sha:',
-      context.payload.repository.owner,
+      context.payload.repository.owner.login,
       context.payload.repository.url,
       checkName,
       context.sha
     )
 
     check = await octokit.checks.create({
-      owner: context.payload.repository.owner,
+      owner: context.payload.repository.owner.login,
       repo: context.payload.repository.url,
       name: checkName,
       head_sha: context.sha,
@@ -152,7 +152,7 @@ const sizeCheck = async (
     const parts = out.stdout.split('\n')
     const title = parts[2]
     await octokit.checks.update({
-      owner: context.payload.repository.owner,
+      owner: context.payload.repository.owner.login,
       repo: context.payload.repository.url,
       check_run_id: check.data.id,
       conclusion: 'success',
@@ -175,7 +175,7 @@ const sizeCheck = async (
   } catch (err) {
     console.error('sizeCheck error:', err)
     await octokit.checks.update({
-      owner: context.payload.repository.owner,
+      owner: context.payload.repository.owner.login,
       repo: context.payload.repository.url,
       check_run_id: check.data.id,
       conclusion: 'failure',

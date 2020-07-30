@@ -17685,7 +17685,7 @@ const globby_1 = __importDefault(__webpack_require__(625));
  */
 const prFiles = (octokit, context) => __awaiter(void 0, void 0, void 0, function* () {
     const pr = yield octokit.repos.listPullRequestsAssociatedWithCommit({
-        owner: context.payload.repository.owner,
+        owner: context.payload.repository.owner.login,
         repo: context.payload.repository.url,
         commit_sha: context.sha
     });
@@ -17694,7 +17694,7 @@ const prFiles = (octokit, context) => __awaiter(void 0, void 0, void 0, function
         throw new Error(`no PRs associated with commit ${context.payload.sha}`);
     }
     const pullRequestFiles = yield octokit.pulls.listFiles({
-        owner: context.payload.repository.owner,
+        owner: context.payload.repository.owner.login,
         repo: context.payload.repository.url,
         pull_number: pr.data[0].number
     });
@@ -17760,9 +17760,9 @@ const sizeCheck = (core, octokit, context, baseDir) => __awaiter(void 0, void 0,
     const checkName = isMonorepo() ? `size: ${pkgName}` : 'size';
     console.log('sizeCheck with buildCommand, pkgName, checkName:', buildCommand, pkgName, checkName);
     try {
-        console.log('octokit.checks.create with owner, url, checkName, context.sha:', context.payload.repository.owner, context.payload.repository.url, checkName, context.sha);
+        console.log('octokit.checks.create with owner, url, checkName, context.sha:', context.payload.repository.owner.login, context.payload.repository.url, checkName, context.sha);
         check = yield octokit.checks.create({
-            owner: context.payload.repository.owner,
+            owner: context.payload.repository.owner.login,
             repo: context.payload.repository.url,
             name: checkName,
             head_sha: context.sha,
@@ -17781,7 +17781,7 @@ const sizeCheck = (core, octokit, context, baseDir) => __awaiter(void 0, void 0,
         const parts = out.stdout.split('\n');
         const title = parts[2];
         yield octokit.checks.update({
-            owner: context.payload.repository.owner,
+            owner: context.payload.repository.owner.login,
             repo: context.payload.repository.url,
             check_run_id: check.data.id,
             conclusion: 'success',
@@ -17799,7 +17799,7 @@ const sizeCheck = (core, octokit, context, baseDir) => __awaiter(void 0, void 0,
     catch (err) {
         console.error('sizeCheck error:', err);
         yield octokit.checks.update({
-            owner: context.payload.repository.owner,
+            owner: context.payload.repository.owner.login,
             repo: context.payload.repository.url,
             check_run_id: check.data.id,
             conclusion: 'failure',
