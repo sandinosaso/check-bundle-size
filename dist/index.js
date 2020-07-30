@@ -3793,8 +3793,7 @@ const github = __importStar(__webpack_require__(469));
 const utils_1 = __webpack_require__(611);
 const context = github.context;
 const run = () => __awaiter(void 0, void 0, void 0, function* () {
-    core.debug(`Running with context ${context} ...`);
-    console.log(`running with context ${context} ...`);
+    console.log(`running with context:`, context);
     const myToken = core.getInput('github_token');
     const debug_command = core.getInput('debug_command');
     core.debug(`Build command ${debug_command} ...`);
