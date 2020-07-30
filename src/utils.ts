@@ -188,7 +188,7 @@ const sizeCheck = async (
         await globby(['dist/*'], {cwd: baseDir, absolute: true}),
         baseDir,
         {
-          continueOnError: false
+          continueOnError: true
         }
       )
   } catch (err) {

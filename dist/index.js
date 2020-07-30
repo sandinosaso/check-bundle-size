@@ -17805,7 +17805,7 @@ const sizeCheck = (core, octokit, context, baseDir) => __awaiter(void 0, void 0,
         yield artifact
             .create()
             .uploadArtifact(`${pkgName}-size`, yield globby_1.default(['dist/*'], { cwd: baseDir, absolute: true }), baseDir, {
-            continueOnError: false
+            continueOnError: true
         });
     }
     catch (err) {
