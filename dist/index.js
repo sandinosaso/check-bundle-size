@@ -17686,8 +17686,8 @@ const globby_1 = __importDefault(__webpack_require__(625));
 const prFiles = (octokit, context) => __awaiter(void 0, void 0, void 0, function* () {
     const pr = yield octokit.repos.listPullRequestsAssociatedWithCommit({
         owner: context.payload.repository.owner,
-        repo: context.payload.repository.repo,
-        commit_sha: context.payload.sha
+        repo: context.payload.repository.url,
+        commit_sha: context.sha
     });
     console.log('Got pr associated with this commit with context.payload.repository, pr', context.payload.repository, pr);
     if (pr.data.length === 0) {
@@ -17695,7 +17695,7 @@ const prFiles = (octokit, context) => __awaiter(void 0, void 0, void 0, function
     }
     const pullRequestFiles = yield octokit.pulls.listFiles({
         owner: context.payload.repository.owner,
-        repo: context.payload.repository.repo,
+        repo: context.payload.repository.url,
         pull_number: pr.data[0].number
     });
     return pullRequestFiles.data.map((f) => f.filename);
@@ -17760,12 +17760,12 @@ const sizeCheck = (core, octokit, context, baseDir) => __awaiter(void 0, void 0,
     const checkName = isMonorepo() ? `size: ${pkgName}` : 'size';
     console.log('sizeCheck with buildCommand, pkgName, checkName:', buildCommand, pkgName, checkName);
     try {
-        console.log('octokit.checks.create with context.payload.repository, checkName, context.payload.sha:', context.payload.repository, checkName, context.payload.sha);
+        console.log('octokit.checks.create with owner, url, checkName, context.sha:', context.payload.repository.owner, context.payload.repository.url, checkName, context.sha);
         check = yield octokit.checks.create({
             owner: context.payload.repository.owner,
-            repo: context.payload.repository.repo,
+            repo: context.payload.repository.url,
             name: checkName,
-            head_sha: context.payload.sha,
+            head_sha: context.sha,
             status: 'in_progress'
         });
         const out = yield execa_1.default(buildCommand, ['-a', '-b'], {
@@ -17781,7 +17781,7 @@ const sizeCheck = (core, octokit, context, baseDir) => __awaiter(void 0, void 0,
         const title = parts[2];
         yield octokit.checks.update({
             owner: context.payload.repository.owner,
-            repo: context.payload.repository.repo,
+            repo: context.payload.repository.url,
             check_run_id: check.data.id,
             conclusion: 'success',
             output: {
@@ -17798,7 +17798,7 @@ const sizeCheck = (core, octokit, context, baseDir) => __awaiter(void 0, void 0,
     catch (err) {
         yield octokit.checks.update({
             owner: context.payload.repository.owner,
-            repo: context.payload.repository.repo,
+            repo: context.payload.repository.url,
             check_run_id: check.data.id,
             conclusion: 'failure',
             output: {

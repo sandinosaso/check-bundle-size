@@ -19,8 +19,8 @@ import globby from 'globby'
 const prFiles = async (octokit: any, context: any): Promise<string[]> => {
   const pr = await octokit.repos.listPullRequestsAssociatedWithCommit({
     owner: context.payload.repository.owner,
-    repo: context.payload.repository.repo,
-    commit_sha: context.payload.sha
+    repo: context.payload.repository.url,
+    commit_sha: context.sha
   })
 
   console.log(
@@ -35,7 +35,7 @@ const prFiles = async (octokit: any, context: any): Promise<string[]> => {
 
   const pullRequestFiles = await octokit.pulls.listFiles({
     owner: context.payload.repository.owner,
-    repo: context.payload.repository.repo,
+    repo: context.payload.repository.url,
     pull_number: pr.data[0].number
   })
 
@@ -121,17 +121,18 @@ const sizeCheck = async (
 
   try {
     console.log(
-      'octokit.checks.create with context.payload.repository, checkName, context.payload.sha:',
-      context.payload.repository,
+      'octokit.checks.create with owner, url, checkName, context.sha:',
+      context.payload.repository.owner,
+      context.payload.repository.url,
       checkName,
-      context.payload.sha
+      context.sha
     )
 
     check = await octokit.checks.create({
       owner: context.payload.repository.owner,
-      repo: context.payload.repository.repo,
+      repo: context.payload.repository.url,
       name: checkName,
-      head_sha: context.payload.sha,
+      head_sha: context.sha,
       status: 'in_progress'
     })
 
@@ -150,7 +151,7 @@ const sizeCheck = async (
     const title = parts[2]
     await octokit.checks.update({
       owner: context.payload.repository.owner,
-      repo: context.payload.repository.repo,
+      repo: context.payload.repository.url,
       check_run_id: check.data.id,
       conclusion: 'success',
       output: {
@@ -172,7 +173,7 @@ const sizeCheck = async (
   } catch (err) {
     await octokit.checks.update({
       owner: context.payload.repository.owner,
-      repo: context.payload.repository.repo,
+      repo: context.payload.repository.url,
       check_run_id: check.data.id,
       conclusion: 'failure',
       output: {
