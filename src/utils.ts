@@ -139,7 +139,7 @@ const sizeCheck = async (
 
     console.log('Going to execut npm run all, baseDir', baseDir)
 
-    const testcommand = await execa('ls', ['lash'], {
+    const testcommand = await execa('ls', ['-lash'], {
       cwd: baseDir,
       localDir: '.',
       preferLocal: true,
