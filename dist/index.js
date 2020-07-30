@@ -8383,15 +8383,14 @@ const gzipSize = (filePath) => __awaiter(void 0, void 0, void 0, function* () {
         });
     });
 });
-const getBundleSizeDiff = () => __awaiter(void 0, void 0, void 0, function* () {
+const getBundleSizeDiff = (pathToDistFolder) => __awaiter(void 0, void 0, void 0, function* () {
     const statsFileJson = fs_extra_1.default
-        .readFileSync(path_1.default.join(process.cwd(), 'dist/stats.json'))
+        .readFileSync(path_1.default.join(process.cwd(), `${pathToDistFolder}/stats.json`))
         .toString();
     const stats = JSON.parse(statsFileJson);
     const gzip = yield gzipSize(path_1.default.join(stats.outputPath, stats.assets[0]));
     const maxsize = 100; // bytes(config.bundlesize.maxSize)
     const diff = gzip - maxsize;
-    console.log('statsFileJson:', statsFileJson);
     console.log('Use http://webpack.github.io/analyse/ to load "./dist/stats.json".');
     // console.log(`Check previous sizes in https://bundlephobia.com/result?p=${pkg.name}@${pkg.version}`)
     let summary = '';
@@ -8412,7 +8411,8 @@ const getBundleSizeDiff = () => __awaiter(void 0, void 0, void 0, function* () {
  */
 const sizeCheck = (core, octokit, context, baseDir) => __awaiter(void 0, void 0, void 0, function* () {
     let check = null;
-    const buildCommand = core.getInput('command_for_building');
+    const buildCommand = core.getInput('build_command');
+    const pathToDistFolder = core.getInput('dist_folder_path');
     const pkgName = baseDir.split('/').pop();
     const checkName = isMonorepo() ? `size: ${pkgName}` : 'size';
     console.log('sizeCheck with buildCommand, pkgName, checkName:', buildCommand, pkgName, checkName);
@@ -8427,22 +8427,22 @@ const sizeCheck = (core, octokit, context, baseDir) => __awaiter(void 0, void 0,
         });
         console.log('octokit.checks.create returned:', check);
         console.log('Going to execut npm run all, baseDir', baseDir);
-        const testcommand = yield execa_1.default('ls', ['-lash', 'dist'], {
+        const testcommand = yield execa_1.default('ls', ['-lash', pathToDistFolder], {
             cwd: baseDir,
             localDir: '.',
             preferLocal: true,
             env: { CI: 'true' }
         });
         console.log('Size check test command:', testcommand.stdout);
-        // const out = await execa('npm install', {
-        //   cwd: baseDir,
-        //   localDir: '.',
-        //   preferLocal: true,
-        //   env: {CI: 'true'}
-        // })
-        // console.log('npm install result:', out.stdout)
-        // console.log(out.stdout)
-        const { diff, summary } = yield getBundleSizeDiff();
+        const out = yield execa_1.default(buildCommand, [], {
+            cwd: baseDir,
+            localDir: '.',
+            preferLocal: true,
+            env: { CI: 'true' }
+        });
+        console.log(`build command result (${buildCommand}):`, out.stdout);
+        console.log(out.stdout);
+        const { diff, summary } = yield getBundleSizeDiff(pathToDistFolder);
         // const parts = out.stdout.split('\n')
         // const title = parts[2]
         const checkupdate = yield octokit.checks.update({
