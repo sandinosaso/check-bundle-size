@@ -73,7 +73,7 @@ const getBundleSizeDiff = async (): Promise<void> => {
   const diff = gzip - maxsize;
 
   console.log('Use http://webpack.github.io/analyse/ to load "./dist/stats.json".')
-  console.log(`Check previous sizes in https://bundlephobia.com/result?p=${pkg.name}@${pkg.version}`)
+  // console.log(`Check previous sizes in https://bundlephobia.com/result?p=${pkg.name}@${pkg.version}`)
 
   if (diff > 0) {
     throw new Error(`${bytes(gzip)} (▲${bytes(diff)} / ${bytes(maxsize)})`)
