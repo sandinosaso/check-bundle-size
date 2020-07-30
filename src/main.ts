@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 
@@ -30,5 +31,5 @@ const run = async (): Promise<void> => {
   }
 }
 
-console.log('Going to call run now');
+console.log('Going to call run now')
 run()
