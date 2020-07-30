@@ -81,7 +81,7 @@ const getBundleSizeDiff = async (): Promise<{
     .readFileSync(path.join(process.cwd(), 'dist/stats.json'))
     .toString()
   const stats = JSON.parse(statsFileJson)
-  const gzip = await gzipSize(path.join(stats.outputPath, stats.assets[0].name))
+  const gzip = await gzipSize(path.join(stats.outputPath, stats.assets[0]))
   const maxsize = 100 // bytes(config.bundlesize.maxSize)
   const diff = gzip - maxsize
 

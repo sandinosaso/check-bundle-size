@@ -8388,7 +8388,7 @@ const getBundleSizeDiff = () => __awaiter(void 0, void 0, void 0, function* () {
         .readFileSync(path_1.default.join(process.cwd(), 'dist/stats.json'))
         .toString();
     const stats = JSON.parse(statsFileJson);
-    const gzip = yield gzipSize(path_1.default.join(stats.outputPath, stats.assets[0].name));
+    const gzip = yield gzipSize(path_1.default.join(stats.outputPath, stats.assets[0]));
     const maxsize = 100; // bytes(config.bundlesize.maxSize)
     const diff = gzip - maxsize;
     console.log('statsFileJson:', statsFileJson);
