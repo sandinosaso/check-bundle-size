@@ -5,13 +5,10 @@ inputs:
   github_token:
     description: The GITHUB_TOKEN secret
     required: true
-  command_for_building:
-    description: The command to build your project
+  stats_file_path:
+    description: The path to the stats.json file
     required: true
-    default: 'yarn build'
-  debug_command:
-    description: The command to debug_command 
-    required: false
+    default: 'dist/stats.json'
 runs:
   using: 'node12'
   main: 'dist/index.js'
