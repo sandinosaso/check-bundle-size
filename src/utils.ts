@@ -220,22 +220,23 @@ const sizeCheck = async (
   const checkName = isMonorepo(baseDir)
     ? `Check Bundle Size for package: ${pkgName}`
     : 'Check Bundle Size'
+  const gitHubSha = process.env.GITHUB_SHA
 
   console.log('sizeCheck with, pkgName, checkName:', pkgName, checkName)
 
   try {
     console.log(
-      'octokit.checks.create with context.payload.repository, context.sha:',
+      'octokit.checks.create with context.payload.repository, gitHubSha:',
       context.payload.repository,
       checkName,
-      context.sha
+      gitHubSha
     )
 
     check = await octokit.checks.create({
       owner: context.payload.repository.owner.login,
       repo: context.payload.repository.name,
       name: checkName,
-      head_sha: context.sha,
+      head_sha: gitHubSha,
       status: 'in_progress'
     })
 
