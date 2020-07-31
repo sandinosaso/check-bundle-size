@@ -19,8 +19,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - run: |
+          npm install
+      - run: |
+          npm run all
       - uses: ./
         with:
-          github_token: "XYZ"
-          command_for_building: "npm run build"
-          debug_command: "npm run build"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          stats_file_path: "dist/stats.json"
