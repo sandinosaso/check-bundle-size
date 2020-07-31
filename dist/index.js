@@ -8339,20 +8339,30 @@ const execa_1 = __importDefault(__webpack_require__(955));
  * @return {string[]} Returns the list of files names
  */
 const prFiles = (octokit, context) => __awaiter(void 0, void 0, void 0, function* () {
-    const lprConfig = {
-        owner: context.payload.repository.owner.login,
-        repo: context.payload.repository.name,
-        commit_sha: context.sha
-    };
-    const pr = yield octokit.repos.listPullRequestsAssociatedWithCommit(lprConfig);
-    console.log('Getting this pr files listPullRequestsAssociatedWithCommit, lprConfig, result:', lprConfig, pr);
-    if (pr.data.length === 0) {
-        throw new Error(`No PRs associated with commit ${context.payload.sha}`);
-    }
+    // TODO -> Investigate why I can not get PR from a commit sha ???
+    // const lprConfig = {
+    //   owner: context.payload.repository.owner.login,
+    //   repo: context.payload.repository.name,
+    //   commit_sha: context.sha,
+    //   mediaType: {
+    //     previews: [
+    //       'groot'
+    //     ]
+    //   }
+    // }
+    // const pr = await octokit.repos.listPullRequestsAssociatedWithCommit(lprConfig)
+    // console.log(
+    //   'Getting this pr files listPullRequestsAssociatedWithCommit, lprConfig, result:',
+    //   lprConfig,
+    //   pr
+    // )
+    // if (pr.data.length === 0) {
+    //   throw new Error(`No PRs associated with commit ${context.payload.sha}`)
+    // }
     const pullRequestFiles = yield octokit.pulls.listFiles({
         owner: context.payload.repository.owner.login,
         repo: context.payload.repository.name,
-        pull_number: pr.data[0].number
+        pull_number: context.payload.pull_request.id
     });
     return pullRequestFiles.data.map((f) => f.filename);
 });
