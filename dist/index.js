@@ -1679,7 +1679,7 @@ const run = () => __awaiter(void 0, void 0, void 0, function* () {
     const baseDir = process.cwd();
     console.log(`Running check in baseDir: ${baseDir}...`);
     try {
-        if (utils_1.isMonorepo()) {
+        if (utils_1.isMonorepo(baseDir)) {
             console.log('We are in a monorepo');
             const changedFiles = yield utils_1.commitFiles(octokit, context);
             const pkgsNames = utils_1.getPackagesNamesFromChangedFiles(changedFiles);
@@ -8466,9 +8466,9 @@ const gzipSize = (filePath) => __awaiter(void 0, void 0, void 0, function* () {
         });
     });
 });
-const getBundleSizeDiff = (pathToStatsFile) => __awaiter(void 0, void 0, void 0, function* () {
+const getBundleSizeDiff = (baseDir, pathToStatsFile) => __awaiter(void 0, void 0, void 0, function* () {
     const statsFileJson = fs_extra_1.default
-        .readFileSync(path_1.default.join(process.cwd(), pathToStatsFile))
+        .readFileSync(path_1.default.join(baseDir, pathToStatsFile))
         .toString();
     const stats = JSON.parse(statsFileJson);
     const gzip = yield gzipSize(path_1.default.join(stats.outputPath, stats.assets[0]));
@@ -8496,7 +8496,7 @@ const sizeCheck = (core, octokit, context, baseDir) => __awaiter(void 0, void 0,
     let check = null;
     const statsFilePath = core.getInput('stats_file_path');
     const pkgName = baseDir.split('/').pop();
-    const checkName = isMonorepo()
+    const checkName = isMonorepo(baseDir)
         ? `Check Bundle Size for package: ${pkgName}`
         : 'Check Bundle Size';
     console.log('sizeCheck with, pkgName, checkName:', pkgName, checkName);
@@ -8518,7 +8518,7 @@ const sizeCheck = (core, octokit, context, baseDir) => __awaiter(void 0, void 0,
             env: { CI: 'true' }
         });
         console.log('Ls command for test:', testcommand.stdout);
-        const { diff, summary } = yield getBundleSizeDiff(statsFilePath);
+        const { diff, summary } = yield getBundleSizeDiff(baseDir, statsFilePath);
         // const parts = out.stdout.split('\n')
         // const title = parts[2]
         const checkupdate = yield octokit.checks.update({
@@ -8559,8 +8559,8 @@ const sizeCheck = (core, octokit, context, baseDir) => __awaiter(void 0, void 0,
     }
 });
 exports.sizeCheck = sizeCheck;
-const isMonorepo = () => {
-    return fs_extra_1.default.existsSync(path_1.default.join(process.cwd(), 'packages'));
+const isMonorepo = (baseDir) => {
+    return fs_extra_1.default.existsSync(path_1.default.join(baseDir, 'packages'));
 };
 exports.isMonorepo = isMonorepo;
 

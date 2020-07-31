@@ -18,7 +18,7 @@ const run = async (): Promise<void> => {
   const baseDir = process.cwd()
   console.log(`Running check in baseDir: ${baseDir}...`)
   try {
-    if (isMonorepo()) {
+    if (isMonorepo(baseDir)) {
       console.log('We are in a monorepo')
       const changedFiles = await commitFiles(octokit, context)
       const pkgsNames = getPackagesNamesFromChangedFiles(changedFiles)

@@ -129,13 +129,14 @@ const gzipSize = async (filePath: string): Promise<number> => {
 }
 
 const getBundleSizeDiff = async (
+  baseDir: string,
   pathToStatsFile: string
 ): Promise<{
   diff: number
   summary: string
 }> => {
   const statsFileJson: string = fs
-    .readFileSync(path.join(process.cwd(), pathToStatsFile))
+    .readFileSync(path.join(baseDir, pathToStatsFile))
     .toString()
   const stats = JSON.parse(statsFileJson)
   const gzip = await gzipSize(path.join(stats.outputPath, stats.assets[0]))
@@ -173,7 +174,7 @@ const sizeCheck = async (
   let check = null
   const statsFilePath = core.getInput('stats_file_path')
   const pkgName = baseDir.split('/').pop()
-  const checkName = isMonorepo()
+  const checkName = isMonorepo(baseDir)
     ? `Check Bundle Size for package: ${pkgName}`
     : 'Check Bundle Size'
 
@@ -207,7 +208,7 @@ const sizeCheck = async (
     })
     console.log('Ls command for test:', testcommand.stdout)
 
-    const {diff, summary} = await getBundleSizeDiff(statsFilePath)
+    const {diff, summary} = await getBundleSizeDiff(baseDir, statsFilePath)
 
     // const parts = out.stdout.split('\n')
     // const title = parts[2]
@@ -251,8 +252,8 @@ const sizeCheck = async (
   }
 }
 
-const isMonorepo = (): boolean => {
-  return fs.existsSync(path.join(process.cwd(), 'packages'))
+const isMonorepo = (baseDir: string): boolean => {
+  return fs.existsSync(path.join(baseDir, 'packages'))
 }
 
 export {
