@@ -21,7 +21,7 @@ const commitFiles = async (octokit: any, context: any): Promise<string[]> => {
     const listCommitFilesConfig = {
       owner: context.payload.repository.owner.login,
       repo: context.payload.repository.name,
-      commit_sha: context.payload.sha
+      commit_sha: context.sha
     }
 
     const commit = await octokit.git.getCommit(listCommitFilesConfig)

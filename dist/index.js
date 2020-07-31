@@ -8342,7 +8342,7 @@ const commitFiles = (octokit, context) => __awaiter(void 0, void 0, void 0, func
         const listCommitFilesConfig = {
             owner: context.payload.repository.owner.login,
             repo: context.payload.repository.name,
-            commit_sha: context.payload.sha
+            commit_sha: context.sha
         };
         const commit = yield octokit.git.getCommit(listCommitFilesConfig);
         console.log('Getting this pr files octokit.pulls.listFiles, listCommitFiles, commit:', listCommitFilesConfig, commit);
