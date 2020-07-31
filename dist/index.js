@@ -8381,11 +8381,12 @@ const execa_1 = __importDefault(__webpack_require__(955));
  * @return {string[]} Returns the list of files names
  */
 const commitFiles = (octokit, context) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a, _b, _c, _d;
     try {
         const listCommitFilesConfig = {
-            owner: context.payload.repository.owner.login,
-            repo: context.payload.repository.name,
-            commit_sha: context.sha
+            owner: (_b = (_a = context.payload) === null || _a === void 0 ? void 0 : _a.repository) === null || _b === void 0 ? void 0 : _b.owner,
+            repo: (_d = (_c = context.payload) === null || _c === void 0 ? void 0 : _c.repository) === null || _d === void 0 ? void 0 : _d.name,
+            ref: context.ref
         };
         const commit = yield octokit.repos.getCommit(listCommitFilesConfig);
         console.log('Getting this commit files octokit.pulls.listFiles, listCommitFiles, commit:', listCommitFilesConfig, commit);

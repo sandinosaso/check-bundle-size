@@ -20,9 +20,9 @@ import execa from 'execa'
 const commitFiles = async (octokit: any, context: any): Promise<string[]> => {
   try {
     const listCommitFilesConfig = {
-      owner: context.payload.repository.owner.login,
-      repo: context.payload.repository.name,
-      commit_sha: context.sha
+      owner: context.payload?.repository?.owner,
+      repo: context.payload?.repository?.name,
+      ref: context.ref
     }
 
     const commit = await octokit.repos.getCommit(listCommitFilesConfig)
