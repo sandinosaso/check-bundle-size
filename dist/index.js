@@ -1677,12 +1677,11 @@ const run = () => __awaiter(void 0, void 0, void 0, function* () {
     console.log(`Running check ...`);
     console.log(`Context:`, context);
     const myToken = core.getInput('github_token');
-    console.log(`Running using myToken: ${myToken.split(' ').join(' ')}`);
     const octokit = github.getOctokit(myToken);
     try {
         if (utils_1.isMonorepo()) {
             console.log('We are in a monorepo');
-            const changedFiles = yield utils_1.prFiles(octokit, context);
+            const changedFiles = yield utils_1.commitFiles(octokit, context);
             const pkgs = utils_1.prPackages(changedFiles);
             yield Promise.all(pkgs.map((pkg) => __awaiter(void 0, void 0, void 0, function* () { return utils_1.sizeCheck(core, octokit, context, pkg); })));
         }
@@ -8388,9 +8387,9 @@ const commitFiles = (octokit, context) => __awaiter(void 0, void 0, void 0, func
             repo: context.payload.repository.name,
             commit_sha: context.sha
         };
-        const commit = yield octokit.git.getCommit(listCommitFilesConfig);
-        console.log('Getting this pr files octokit.pulls.listFiles, listCommitFiles, commit:', listCommitFilesConfig, commit);
-        return commit.files.map((f) => f.filename);
+        const commit = yield octokit.repos.getCommit(listCommitFilesConfig);
+        console.log('Getting this commit files octokit.pulls.listFiles, listCommitFiles, commit:', listCommitFilesConfig, commit);
+        return commit.data.files.map((f) => f.filename);
     }
     catch (error) {
         console.error('commitFiles error:', error);
@@ -8412,9 +8411,7 @@ const prFiles = (octokit, context) => __awaiter(void 0, void 0, void 0, function
             repo: context.payload.repository.name,
             commit_sha: context.sha,
             mediaType: {
-                previews: [
-                    'groot'
-                ]
+                previews: ['groot']
             }
         };
         const pr = yield octokit.repos.listPullRequestsAssociatedWithCommit(lprConfig);

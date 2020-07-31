@@ -25,14 +25,14 @@ const commitFiles = async (octokit: any, context: any): Promise<string[]> => {
       commit_sha: context.sha
     }
 
-    const commit = await octokit.git.getCommit(listCommitFilesConfig)
+    const commit = await octokit.repos.getCommit(listCommitFilesConfig)
 
     console.log(
-      'Getting this pr files octokit.pulls.listFiles, listCommitFiles, commit:',
+      'Getting this commit files octokit.pulls.listFiles, listCommitFiles, commit:',
       listCommitFilesConfig,
       commit
     )
-    return commit.files.map((f: any) => f.filename)
+    return commit.data.files.map((f: any) => f.filename)
   } catch (error) {
     console.error('commitFiles error:', error)
     throw error

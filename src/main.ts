@@ -2,21 +2,20 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 
-import {prPackages, sizeCheck, isMonorepo, prFiles} from './utils'
+import {prPackages, sizeCheck, isMonorepo, commitFiles} from './utils'
 const context = github.context
 
 const run = async (): Promise<void> => {
   console.log(`Running check ...`)
   console.log(`Context:`, context)
   const myToken = core.getInput('github_token')
-  console.log(`Running using myToken: ${myToken.split(' ').join(' ')}`)
 
   const octokit = github.getOctokit(myToken)
 
   try {
     if (isMonorepo()) {
       console.log('We are in a monorepo')
-      const changedFiles = await prFiles(octokit, context)
+      const changedFiles = await commitFiles(octokit, context)
       const pkgs = prPackages(changedFiles)
 
       await Promise.all(
