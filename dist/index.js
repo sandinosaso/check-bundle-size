@@ -8338,14 +8338,15 @@ const execa_1 = __importDefault(__webpack_require__(955));
  * @return {string[]} Returns the list of files names
  */
 const prFiles = (octokit, context) => __awaiter(void 0, void 0, void 0, function* () {
-    const pr = yield octokit.repos.listPullRequestsAssociatedWithCommit({
+    const lprConfig = {
         owner: context.payload.repository.owner.login,
         repo: context.payload.repository.name,
         commit_sha: context.sha
-    });
-    console.log('Got pr associated with this commit with context.payload.repository, pr', context.payload.repository, pr);
+    };
+    const pr = yield octokit.repos.listPullRequestsAssociatedWithCommit(lprConfig);
+    console.log('Getting this pr files listPullRequestsAssociatedWithCommit, lprConfig, result:', lprConfig, pr, context);
     if (pr.data.length === 0) {
-        throw new Error(`no PRs associated with commit ${context.payload.sha}`);
+        throw new Error(`No PRs associated with commit ${context.payload.sha}`);
     }
     const pullRequestFiles = yield octokit.pulls.listFiles({
         owner: context.payload.repository.owner.login,
@@ -8413,7 +8414,9 @@ const sizeCheck = (core, octokit, context, baseDir) => __awaiter(void 0, void 0,
     let check = null;
     const statsFilePath = core.getInput('stats_file_path');
     const pkgName = baseDir.split('/').pop();
-    const checkName = isMonorepo() ? `Check Bundle Size for package: ${pkgName}` : 'Check Bundle Size';
+    const checkName = isMonorepo()
+        ? `Check Bundle Size for package: ${pkgName}`
+        : 'Check Bundle Size';
     console.log('sizeCheck with, pkgName, checkName:', pkgName, checkName);
     try {
         console.log('octokit.checks.create with context.payload.repository, context.sha:', context.payload.repository, checkName, context.sha);

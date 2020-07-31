@@ -17,20 +17,22 @@ import execa from 'execa'
  * @return {string[]} Returns the list of files names
  */
 const prFiles = async (octokit: any, context: any): Promise<string[]> => {
-  const pr = await octokit.repos.listPullRequestsAssociatedWithCommit({
+  const lprConfig = {
     owner: context.payload.repository.owner.login,
     repo: context.payload.repository.name,
     commit_sha: context.sha
-  })
+  }
+  const pr = await octokit.repos.listPullRequestsAssociatedWithCommit(lprConfig)
 
   console.log(
-    'Got pr associated with this commit with context.payload.repository, pr',
-    context.payload.repository,
-    pr
+    'Getting this pr files listPullRequestsAssociatedWithCommit, lprConfig, result:',
+    lprConfig,
+    pr,
+    context
   )
 
   if (pr.data.length === 0) {
-    throw new Error(`no PRs associated with commit ${context.payload.sha}`)
+    throw new Error(`No PRs associated with commit ${context.payload.sha}`)
   }
 
   const pullRequestFiles = await octokit.pulls.listFiles({
