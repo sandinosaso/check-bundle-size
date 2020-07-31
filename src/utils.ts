@@ -135,27 +135,38 @@ const getBundleSizeDiff = async (
   diff: number
   summary: string
 }> => {
-  const statsFileJson: string = fs
-    .readFileSync(path.join(baseDir, pathToStatsFile))
-    .toString()
-  const stats = JSON.parse(statsFileJson)
-  const gzip = await gzipSize(path.join(stats.outputPath, stats.assets[0]))
-  const maxsize = 100 // bytes(config.bundlesize.maxSize)
-  const diff = gzip - maxsize
+  try {
+    const statsFileJson: string = fs
+      .readFileSync(path.join(baseDir, pathToStatsFile))
+      .toString()
+    const stats = JSON.parse(statsFileJson)
+    console.log(
+      'getBundleSizeDiff going to calculate gsize for, stats.outputPath, stats.assets[0]:',
+      stats.outputPath,
+      stats.assets[0],
+      path.join(stats.outputPath, stats.assets[0])
+    )
+    const gzip = await gzipSize(path.join(stats.outputPath, stats.assets[0]))
+    const maxsize = 100 // bytes(config.bundlesize.maxSize)
+    const diff = gzip - maxsize
 
-  console.log(
-    'Use http://webpack.github.io/analyse/ to load "./dist/stats.json".'
-  )
-  // console.log(`Check previous sizes in https://bundlephobia.com/result?p=${pkg.name}@${pkg.version}`)
+    console.log(
+      'Use http://webpack.github.io/analyse/ to load "./dist/stats.json".'
+    )
+    // console.log(`Check previous sizes in https://bundlephobia.com/result?p=${pkg.name}@${pkg.version}`)
 
-  let summary = ''
-  if (diff > 0) {
-    summary = `${bytes(gzip)} (▲${bytes(diff)} / ${bytes(maxsize)})`
-  } else {
-    summary = `${bytes(gzip)} (▼${bytes(diff)} / ${bytes(maxsize)})`
+    let summary = ''
+    if (diff > 0) {
+      summary = `${bytes(gzip)} (▲${bytes(diff)} / ${bytes(maxsize)})`
+    } else {
+      summary = `${bytes(gzip)} (▼${bytes(diff)} / ${bytes(maxsize)})`
+    }
+
+    return {diff, summary}
+  } catch (error) {
+    console.error('getBundleSizeDiff error:', error)
+    throw error
   }
-
-  return {diff, summary}
 }
 
 /**

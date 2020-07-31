@@ -8467,23 +8467,30 @@ const gzipSize = (filePath) => __awaiter(void 0, void 0, void 0, function* () {
     });
 });
 const getBundleSizeDiff = (baseDir, pathToStatsFile) => __awaiter(void 0, void 0, void 0, function* () {
-    const statsFileJson = fs_extra_1.default
-        .readFileSync(path_1.default.join(baseDir, pathToStatsFile))
-        .toString();
-    const stats = JSON.parse(statsFileJson);
-    const gzip = yield gzipSize(path_1.default.join(stats.outputPath, stats.assets[0]));
-    const maxsize = 100; // bytes(config.bundlesize.maxSize)
-    const diff = gzip - maxsize;
-    console.log('Use http://webpack.github.io/analyse/ to load "./dist/stats.json".');
-    // console.log(`Check previous sizes in https://bundlephobia.com/result?p=${pkg.name}@${pkg.version}`)
-    let summary = '';
-    if (diff > 0) {
-        summary = `${bytes_1.default(gzip)} (▲${bytes_1.default(diff)} / ${bytes_1.default(maxsize)})`;
+    try {
+        const statsFileJson = fs_extra_1.default
+            .readFileSync(path_1.default.join(baseDir, pathToStatsFile))
+            .toString();
+        const stats = JSON.parse(statsFileJson);
+        console.log('getBundleSizeDiff going to calculate gsize for, stats.outputPath, stats.assets[0]:', stats.outputPath, stats.assets[0], path_1.default.join(stats.outputPath, stats.assets[0]));
+        const gzip = yield gzipSize(path_1.default.join(stats.outputPath, stats.assets[0]));
+        const maxsize = 100; // bytes(config.bundlesize.maxSize)
+        const diff = gzip - maxsize;
+        console.log('Use http://webpack.github.io/analyse/ to load "./dist/stats.json".');
+        // console.log(`Check previous sizes in https://bundlephobia.com/result?p=${pkg.name}@${pkg.version}`)
+        let summary = '';
+        if (diff > 0) {
+            summary = `${bytes_1.default(gzip)} (▲${bytes_1.default(diff)} / ${bytes_1.default(maxsize)})`;
+        }
+        else {
+            summary = `${bytes_1.default(gzip)} (▼${bytes_1.default(diff)} / ${bytes_1.default(maxsize)})`;
+        }
+        return { diff, summary };
     }
-    else {
-        summary = `${bytes_1.default(gzip)} (▼${bytes_1.default(diff)} / ${bytes_1.default(maxsize)})`;
+    catch (error) {
+        console.error('getBundleSizeDiff error:', error);
+        throw error;
     }
-    return { diff, summary };
 });
 /**
  * Bundle Size Check
