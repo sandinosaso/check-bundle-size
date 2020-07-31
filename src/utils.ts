@@ -114,6 +114,7 @@ const getPackagesNamesFromChangedFiles = (files: string[]): string[] => {
   return packagesNames
 }
 
+/* eslint-disable @typescript-eslint/no-unused-vars */
 const gzipSize = async (filePath: string): Promise<number> => {
   return new Promise((resolve, reject) => {
     let size = 0
@@ -128,11 +129,25 @@ const gzipSize = async (filePath: string): Promise<number> => {
   })
 }
 
+const fileSize = async (filePath: string): Promise<number> => {
+  return new Promise((resolve, reject) => {
+    let size = 0
+    const pipe = fs.createReadStream(filePath)
+    pipe.on('error', reject)
+    pipe.on('data', (buf: any) => {
+      size += buf.length
+    })
+    pipe.on('end', () => {
+      resolve(size)
+    })
+  })
+}
+
 const getBundleSizeDiff = async (
   baseDir: string,
   pathToStatsFile: string
 ): Promise<{
-  diff: number
+  checkFailed: boolean
   summary: string
 }> => {
   try {
@@ -143,26 +158,43 @@ const getBundleSizeDiff = async (
     console.log(
       'getBundleSizeDiff going to calculate gsize for, stats.outputPath, stats.assets[0]:',
       stats.outputPath,
-      stats.assets[0],
-      path.join(stats.outputPath, stats.assets[0])
+      stats.assets[0]
     )
-    const gzip = await gzipSize(path.join(stats.outputPath, stats.assets[0]))
-    const maxsize = 100 // bytes(config.bundlesize.maxSize)
-    const diff = gzip - maxsize
+
+    let checkFailed = false
+    const resultsSummary = await Promise.all(
+      stats.assets.map(async (asset: {name: string; size: number}) => {
+        console.log('Going to calculate gzipSize for file:', asset.name)
+        const currentSize = await fileSize(
+          path.join(stats.outputPath, asset.name)
+        )
+        const maxsize = 100 // bytes(config.bundlesize.maxSize)
+        const diff = currentSize - maxsize
+
+        let summary = ''
+        if (diff > 0) {
+          checkFailed = true
+          summary = `${bytes(currentSize)} (▲${bytes(diff)} / ${bytes(
+            maxsize
+          )})`
+        } else {
+          summary = `${bytes(currentSize)} (▼${bytes(diff)} / ${bytes(
+            maxsize
+          )})`
+        }
+
+        return summary
+      })
+    )
+
+    const summary = resultsSummary.join('\n')
 
     console.log(
       'Use http://webpack.github.io/analyse/ to load "./dist/stats.json".'
     )
     // console.log(`Check previous sizes in https://bundlephobia.com/result?p=${pkg.name}@${pkg.version}`)
 
-    let summary = ''
-    if (diff > 0) {
-      summary = `${bytes(gzip)} (▲${bytes(diff)} / ${bytes(maxsize)})`
-    } else {
-      summary = `${bytes(gzip)} (▼${bytes(diff)} / ${bytes(maxsize)})`
-    }
-
-    return {diff, summary}
+    return {checkFailed, summary}
   } catch (error) {
     console.error('getBundleSizeDiff error:', error)
     throw error
@@ -219,7 +251,10 @@ const sizeCheck = async (
     })
     console.log('Ls command for test:', testcommand.stdout)
 
-    const {diff, summary} = await getBundleSizeDiff(baseDir, statsFilePath)
+    const {checkFailed, summary} = await getBundleSizeDiff(
+      baseDir,
+      statsFilePath
+    )
 
     // const parts = out.stdout.split('\n')
     // const title = parts[2]
@@ -229,7 +264,7 @@ const sizeCheck = async (
       check_run_id: check.data.id,
       conclusion: 'success',
       output: {
-        title: diff > 0 ? 'Error' : 'Success',
+        title: checkFailed ? 'Error' : 'Success',
         summary
       }
     })

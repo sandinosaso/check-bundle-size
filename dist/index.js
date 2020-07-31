@@ -8453,10 +8453,24 @@ const getPackagesNamesFromChangedFiles = (files) => {
     return packagesNames;
 };
 exports.getPackagesNamesFromChangedFiles = getPackagesNamesFromChangedFiles;
+/* eslint-disable @typescript-eslint/no-unused-vars */
 const gzipSize = (filePath) => __awaiter(void 0, void 0, void 0, function* () {
     return new Promise((resolve, reject) => {
         let size = 0;
         const pipe = fs_extra_1.default.createReadStream(filePath).pipe(zlib_1.createGzip({ level: 9 }));
+        pipe.on('error', reject);
+        pipe.on('data', (buf) => {
+            size += buf.length;
+        });
+        pipe.on('end', () => {
+            resolve(size);
+        });
+    });
+});
+const fileSize = (filePath) => __awaiter(void 0, void 0, void 0, function* () {
+    return new Promise((resolve, reject) => {
+        let size = 0;
+        const pipe = fs_extra_1.default.createReadStream(filePath);
         pipe.on('error', reject);
         pipe.on('data', (buf) => {
             size += buf.length;
@@ -8472,20 +8486,27 @@ const getBundleSizeDiff = (baseDir, pathToStatsFile) => __awaiter(void 0, void 0
             .readFileSync(path_1.default.join(baseDir, pathToStatsFile))
             .toString();
         const stats = JSON.parse(statsFileJson);
-        console.log('getBundleSizeDiff going to calculate gsize for, stats.outputPath, stats.assets[0]:', stats.outputPath, stats.assets[0], path_1.default.join(stats.outputPath, stats.assets[0]));
-        const gzip = yield gzipSize(path_1.default.join(stats.outputPath, stats.assets[0]));
-        const maxsize = 100; // bytes(config.bundlesize.maxSize)
-        const diff = gzip - maxsize;
+        console.log('getBundleSizeDiff going to calculate gsize for, stats.outputPath, stats.assets[0]:', stats.outputPath, stats.assets[0]);
+        let checkFailed = false;
+        const resultsSummary = yield Promise.all(stats.assets.map((asset) => __awaiter(void 0, void 0, void 0, function* () {
+            console.log('Going to calculate gzipSize for file:', asset.name);
+            const currentSize = yield fileSize(path_1.default.join(stats.outputPath, asset.name));
+            const maxsize = 100; // bytes(config.bundlesize.maxSize)
+            const diff = currentSize - maxsize;
+            let summary = '';
+            if (diff > 0) {
+                checkFailed = true;
+                summary = `${bytes_1.default(currentSize)} (▲${bytes_1.default(diff)} / ${bytes_1.default(maxsize)})`;
+            }
+            else {
+                summary = `${bytes_1.default(currentSize)} (▼${bytes_1.default(diff)} / ${bytes_1.default(maxsize)})`;
+            }
+            return summary;
+        })));
+        const summary = resultsSummary.join('\n');
         console.log('Use http://webpack.github.io/analyse/ to load "./dist/stats.json".');
         // console.log(`Check previous sizes in https://bundlephobia.com/result?p=${pkg.name}@${pkg.version}`)
-        let summary = '';
-        if (diff > 0) {
-            summary = `${bytes_1.default(gzip)} (▲${bytes_1.default(diff)} / ${bytes_1.default(maxsize)})`;
-        }
-        else {
-            summary = `${bytes_1.default(gzip)} (▼${bytes_1.default(diff)} / ${bytes_1.default(maxsize)})`;
-        }
-        return { diff, summary };
+        return { checkFailed, summary };
     }
     catch (error) {
         console.error('getBundleSizeDiff error:', error);
@@ -8525,7 +8546,7 @@ const sizeCheck = (core, octokit, context, baseDir) => __awaiter(void 0, void 0,
             env: { CI: 'true' }
         });
         console.log('Ls command for test:', testcommand.stdout);
-        const { diff, summary } = yield getBundleSizeDiff(baseDir, statsFilePath);
+        const { checkFailed, summary } = yield getBundleSizeDiff(baseDir, statsFilePath);
         // const parts = out.stdout.split('\n')
         // const title = parts[2]
         const checkupdate = yield octokit.checks.update({
@@ -8534,7 +8555,7 @@ const sizeCheck = (core, octokit, context, baseDir) => __awaiter(void 0, void 0,
             check_run_id: check.data.id,
             conclusion: 'success',
             output: {
-                title: diff > 0 ? 'Error' : 'Success',
+                title: checkFailed ? 'Error' : 'Success',
                 summary
             }
         });
