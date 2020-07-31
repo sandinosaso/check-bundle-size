@@ -27,9 +27,9 @@ type listCommitFileParameters = Endpoints['GET /repos/:owner/:repo/commits/:ref'
 const commitFiles = async (octokit: any, context: any): Promise<string[]> => {
   try {
     const listCommitFilesConfig: listCommitFileParameters = {
-      owner: context.payload?.repository?.owner,
+      owner: context.payload?.repository?.owner?.login,
       repo: context.payload?.repository?.name,
-      ref: context.ref
+      ref: context.sha
     }
 
     const commit: OctokitResponse<ReposGetCommitResponseData> = await octokit.repos.getCommit(
