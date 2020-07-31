@@ -98,28 +98,20 @@ const prFiles = async (octokit: any, context: any): Promise<string[]> => {
   }
 }
 
-const prPackages = (files: string[]): string[] => {
-  const baseDir = 'packages'
-
-  const packages: string[] = []
+const getPackagesNamesFromChangedFiles = (files: string[]): string[] => {
+  const packagesNames: string[] = []
   for (const file of files) {
-    if (file.startsWith(baseDir)) {
+    if (file.startsWith('packages')) {
       const pkgName = file.split('/')[1]
-      const pkgPath = path.join(process.cwd(), pkgName)
-      console.log(
-        `prPackages file starts with ${baseDir}, process.cwd(), pkgName, pkgPath:`,
-        process.cwd(),
-        pkgName,
-        pkgPath
-      )
-      if (!packages.includes(pkgPath)) {
-        packages.push(pkgPath)
+      console.log(`prPackages file starts with packages pkgName:`, pkgName)
+      if (!packagesNames.includes(pkgName)) {
+        packagesNames.push(pkgName)
       }
     }
   }
 
-  console.log('prPackages files, result', files, packages)
-  return packages
+  console.log('prPackages files, result', files, packagesNames)
+  return packagesNames
 }
 
 const gzipSize = async (filePath: string): Promise<number> => {
@@ -263,4 +255,10 @@ const isMonorepo = (): boolean => {
   return fs.existsSync(path.join(process.cwd(), 'packages'))
 }
 
-export {prFiles, commitFiles, prPackages, sizeCheck, isMonorepo}
+export {
+  prFiles,
+  commitFiles,
+  getPackagesNamesFromChangedFiles,
+  sizeCheck,
+  isMonorepo
+}

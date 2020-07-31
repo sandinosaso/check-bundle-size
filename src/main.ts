@@ -2,31 +2,36 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 
-import {prPackages, sizeCheck, isMonorepo, commitFiles} from './utils'
+import {
+  getPackagesNamesFromChangedFiles,
+  sizeCheck,
+  isMonorepo,
+  commitFiles
+} from './utils'
 const context = github.context
 
 const run = async (): Promise<void> => {
-  console.log(`Running check ...`)
-  console.log(`Context:`, context)
   const myToken = core.getInput('github_token')
 
   const octokit = github.getOctokit(myToken)
 
+  const baseDir = process.cwd()
+  console.log(`Running check in baseDir: ${baseDir}...`)
   try {
     if (isMonorepo()) {
       console.log('We are in a monorepo')
       const changedFiles = await commitFiles(octokit, context)
-      const pkgs = prPackages(changedFiles)
+      const pkgsNames = getPackagesNamesFromChangedFiles(changedFiles)
 
       await Promise.all(
-        pkgs.map(async (pkg: string) => {
-          console.log('Going to calculate sizeCheck for package:', pkg)
-          sizeCheck(core, octokit, context, pkg)
+        pkgsNames.map(async (pkgName: string) => {
+          console.log('Going to calculate sizeCheck for package:', pkgName)
+          sizeCheck(core, octokit, context, `${baseDir}/packages/${pkgName}`)
         })
       )
     } else {
       console.log('We are not in a monorepo')
-      await sizeCheck(core, octokit, context, process.cwd())
+      await sizeCheck(core, octokit, context, baseDir)
     }
   } catch (err) {
     core.setFailed(err)

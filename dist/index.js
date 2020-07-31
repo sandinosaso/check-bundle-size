@@ -1674,23 +1674,23 @@ const github = __importStar(__webpack_require__(469));
 const utils_1 = __webpack_require__(611);
 const context = github.context;
 const run = () => __awaiter(void 0, void 0, void 0, function* () {
-    console.log(`Running check ...`);
-    console.log(`Context:`, context);
     const myToken = core.getInput('github_token');
     const octokit = github.getOctokit(myToken);
+    const baseDir = process.cwd();
+    console.log(`Running check in baseDir: ${baseDir}...`);
     try {
         if (utils_1.isMonorepo()) {
             console.log('We are in a monorepo');
             const changedFiles = yield utils_1.commitFiles(octokit, context);
-            const pkgs = utils_1.prPackages(changedFiles);
-            yield Promise.all(pkgs.map((pkg) => __awaiter(void 0, void 0, void 0, function* () {
-                console.log('Going to calculate sizeCheck for package:', pkg);
-                utils_1.sizeCheck(core, octokit, context, pkg);
+            const pkgsNames = utils_1.getPackagesNamesFromChangedFiles(changedFiles);
+            yield Promise.all(pkgsNames.map((pkgName) => __awaiter(void 0, void 0, void 0, function* () {
+                console.log('Going to calculate sizeCheck for package:', pkgName);
+                utils_1.sizeCheck(core, octokit, context, `${baseDir}/packages/${pkgName}`);
             })));
         }
         else {
             console.log('We are not in a monorepo');
-            yield utils_1.sizeCheck(core, octokit, context, process.cwd());
+            yield utils_1.sizeCheck(core, octokit, context, baseDir);
         }
     }
     catch (err) {
@@ -8368,7 +8368,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.isMonorepo = exports.sizeCheck = exports.prPackages = exports.commitFiles = exports.prFiles = void 0;
+exports.isMonorepo = exports.sizeCheck = exports.getPackagesNamesFromChangedFiles = exports.commitFiles = exports.prFiles = void 0;
 const path_1 = __importDefault(__webpack_require__(622));
 const fs_extra_1 = __importDefault(__webpack_require__(226));
 const bytes_1 = __importDefault(__webpack_require__(63));
@@ -8438,23 +8438,21 @@ const prFiles = (octokit, context) => __awaiter(void 0, void 0, void 0, function
     }
 });
 exports.prFiles = prFiles;
-const prPackages = (files) => {
-    const baseDir = 'packages';
-    const packages = [];
+const getPackagesNamesFromChangedFiles = (files) => {
+    const packagesNames = [];
     for (const file of files) {
-        if (file.startsWith(baseDir)) {
+        if (file.startsWith('packages')) {
             const pkgName = file.split('/')[1];
-            const pkgPath = path_1.default.join(process.cwd(), pkgName);
-            console.log(`prPackages file starts with ${baseDir}, process.cwd(), pkgName, pkgPath:`, process.cwd(), pkgName, pkgPath);
-            if (!packages.includes(pkgPath)) {
-                packages.push(pkgPath);
+            console.log(`prPackages file starts with packages pkgName:`, pkgName);
+            if (!packagesNames.includes(pkgName)) {
+                packagesNames.push(pkgName);
             }
         }
     }
-    console.log('prPackages files, result', files, packages);
-    return packages;
+    console.log('prPackages files, result', files, packagesNames);
+    return packagesNames;
 };
-exports.prPackages = prPackages;
+exports.getPackagesNamesFromChangedFiles = getPackagesNamesFromChangedFiles;
 const gzipSize = (filePath) => __awaiter(void 0, void 0, void 0, function* () {
     return new Promise((resolve, reject) => {
         let size = 0;
