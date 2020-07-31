@@ -8339,32 +8339,40 @@ const execa_1 = __importDefault(__webpack_require__(955));
  * @return {string[]} Returns the list of files names
  */
 const prFiles = (octokit, context) => __awaiter(void 0, void 0, void 0, function* () {
-    // TODO -> Investigate why I can not get PR from a commit sha ???
-    // const lprConfig = {
-    //   owner: context.payload.repository.owner.login,
-    //   repo: context.payload.repository.name,
-    //   commit_sha: context.sha,
-    //   mediaType: {
-    //     previews: [
-    //       'groot'
-    //     ]
-    //   }
-    // }
-    // const pr = await octokit.repos.listPullRequestsAssociatedWithCommit(lprConfig)
-    // console.log(
-    //   'Getting this pr files listPullRequestsAssociatedWithCommit, lprConfig, result:',
-    //   lprConfig,
-    //   pr
-    // )
-    // if (pr.data.length === 0) {
-    //   throw new Error(`No PRs associated with commit ${context.payload.sha}`)
-    // }
-    const pullRequestFiles = yield octokit.pulls.listFiles({
-        owner: context.payload.repository.owner.login,
-        repo: context.payload.repository.name,
-        pull_number: context.payload.pull_request.id
-    });
-    return pullRequestFiles.data.map((f) => f.filename);
+    try {
+        // TODO -> Investigate why I can not get PR from a commit sha ???
+        // const lprConfig = {
+        //   owner: context.payload.repository.owner.login,
+        //   repo: context.payload.repository.name,
+        //   commit_sha: context.sha,
+        //   mediaType: {
+        //     previews: [
+        //       'groot'
+        //     ]
+        //   }
+        // }
+        // const pr = await octokit.repos.listPullRequestsAssociatedWithCommit(lprConfig)
+        // console.log(
+        //   'Getting this pr files listPullRequestsAssociatedWithCommit, lprConfig, result:',
+        //   lprConfig,
+        //   pr
+        // )
+        // if (pr.data.length === 0) {
+        //   throw new Error(`No PRs associated with commit ${context.payload.sha}`)
+        // }
+        const listPrFilesConfig = {
+            owner: context.payload.repository.owner.login,
+            repo: context.payload.repository.name,
+            pull_number: context.payload.pull_request.id
+        };
+        const pullRequestFiles = yield octokit.pulls.listFiles(listPrFilesConfig);
+        console.log('Getting this pr files octokit.pulls.listFiles, listPrFilesConfig, pullRequestFiles:', listPrFilesConfig, pullRequestFiles);
+        return pullRequestFiles.data.map((f) => f.filename);
+    }
+    catch (error) {
+        console.error('prFiles error:', error);
+        throw error;
+    }
 });
 exports.prFiles = prFiles;
 const prPackages = (files) => {
