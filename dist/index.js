@@ -1683,7 +1683,10 @@ const run = () => __awaiter(void 0, void 0, void 0, function* () {
             console.log('We are in a monorepo');
             const changedFiles = yield utils_1.commitFiles(octokit, context);
             const pkgs = utils_1.prPackages(changedFiles);
-            yield Promise.all(pkgs.map((pkg) => __awaiter(void 0, void 0, void 0, function* () { return utils_1.sizeCheck(core, octokit, context, pkg); })));
+            yield Promise.all(pkgs.map((pkg) => __awaiter(void 0, void 0, void 0, function* () {
+                console.log('Going to calculate sizeCheck for package:', pkg);
+                utils_1.sizeCheck(core, octokit, context, pkg);
+            })));
         }
         else {
             console.log('We are not in a monorepo');
@@ -8447,6 +8450,7 @@ const prPackages = (files) => {
             }
         }
     }
+    console.log('prPackages files, result', files, packages);
     return packages;
 };
 exports.prPackages = prPackages;

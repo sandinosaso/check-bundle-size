@@ -112,6 +112,7 @@ const prPackages = (files: string[]): string[] => {
     }
   }
 
+  console.log('prPackages files, result', files, packages)
   return packages
 }
 

@@ -19,7 +19,10 @@ const run = async (): Promise<void> => {
       const pkgs = prPackages(changedFiles)
 
       await Promise.all(
-        pkgs.map(async (pkg: string) => sizeCheck(core, octokit, context, pkg))
+        pkgs.map(async (pkg: string) => {
+          console.log('Going to calculate sizeCheck for package:', pkg)
+          sizeCheck(core, octokit, context, pkg)
+        })
       )
     } else {
       console.log('We are not in a monorepo')
