@@ -74,13 +74,13 @@ const gzipSize = async (filePath: string): Promise<number> => {
 }
 
 const getBundleSizeDiff = async (
-  pathToDistFolder: string
+  pathToStatsFile: string
 ): Promise<{
   diff: number
   summary: string
 }> => {
   const statsFileJson: string = fs
-    .readFileSync(path.join(process.cwd(), `${pathToDistFolder}/stats.json`))
+    .readFileSync(path.join(process.cwd(), pathToStatsFile))
     .toString()
   const stats = JSON.parse(statsFileJson)
   const gzip = await gzipSize(path.join(stats.outputPath, stats.assets[0]))
@@ -116,17 +116,13 @@ const sizeCheck = async (
   baseDir: string
 ): Promise<void> => {
   let check = null
-  const buildCommand = core.getInput('build_command')
-  const pathToDistFolder = core.getInput('dist_folder_path')
+  const statsFilePath = core.getInput('stats_file_path')
   const pkgName = baseDir.split('/').pop()
-  const checkName = isMonorepo() ? `size: ${pkgName}` : 'size'
+  const checkName = isMonorepo()
+    ? `Check Bundle Size for package: ${pkgName}`
+    : 'Check Bundle Size'
 
-  console.log(
-    'sizeCheck with buildCommand, pkgName, checkName:',
-    buildCommand,
-    pkgName,
-    checkName
-  )
+  console.log('sizeCheck with, pkgName, checkName:', pkgName, checkName)
 
   try {
     console.log(
@@ -148,24 +144,15 @@ const sizeCheck = async (
 
     console.log('Going to execut npm run all, baseDir', baseDir)
 
-    const testcommand = await execa('ls', ['-lash', pathToDistFolder], {
+    const testcommand = await execa('ls', ['-lash'], {
       cwd: baseDir,
       localDir: '.',
       preferLocal: true,
       env: {CI: 'true'}
     })
-    console.log('Size check test command:', testcommand.stdout)
+    console.log('Ls command for test:', testcommand.stdout)
 
-    const out = await execa(buildCommand, [], {
-      cwd: baseDir,
-      localDir: '.',
-      preferLocal: true,
-      env: {CI: 'true'}
-    })
-    console.log(`build command result (${buildCommand}):`, out.stdout)
-    console.log(out.stdout)
-
-    const {diff, summary} = await getBundleSizeDiff(pathToDistFolder)
+    const {diff, summary} = await getBundleSizeDiff(statsFilePath)
 
     // const parts = out.stdout.split('\n')
     // const title = parts[2]
