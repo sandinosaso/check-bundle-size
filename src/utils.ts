@@ -168,7 +168,7 @@ const getBundleSizeDiff = async (
         const currentSize = await fileSize(
           path.join(stats.outputPath, asset.name)
         )
-        const maxsize = 100 // bytes(config.bundlesize.maxSize)
+        const maxsize = 1000 // bytes(config.bundlesize.maxSize)
         const diff = currentSize - maxsize
 
         let summary = ''
@@ -256,13 +256,12 @@ const sizeCheck = async (
       statsFilePath
     )
 
-    // const parts = out.stdout.split('\n')
-    // const title = parts[2]
     const checkupdate = await octokit.checks.update({
       owner: context.payload.repository.owner.login,
       repo: context.payload.repository.name,
       check_run_id: check.data.id,
-      conclusion: 'success',
+      status: 'completed',
+      conclusion: checkFailed ? 'failure' : 'success',
       output: {
         title: checkFailed ? 'Error' : 'Success',
         summary

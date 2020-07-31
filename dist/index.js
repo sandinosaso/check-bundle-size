@@ -8491,7 +8491,7 @@ const getBundleSizeDiff = (baseDir, pathToStatsFile) => __awaiter(void 0, void 0
         const resultsSummary = yield Promise.all(stats.assets.map((asset) => __awaiter(void 0, void 0, void 0, function* () {
             console.log('Going to calculate gzipSize for file:', asset.name);
             const currentSize = yield fileSize(path_1.default.join(stats.outputPath, asset.name));
-            const maxsize = 100; // bytes(config.bundlesize.maxSize)
+            const maxsize = 1000; // bytes(config.bundlesize.maxSize)
             const diff = currentSize - maxsize;
             let summary = '';
             if (diff > 0) {
@@ -8547,13 +8547,12 @@ const sizeCheck = (core, octokit, context, baseDir) => __awaiter(void 0, void 0,
         });
         console.log('Ls command for test:', testcommand.stdout);
         const { checkFailed, summary } = yield getBundleSizeDiff(baseDir, statsFilePath);
-        // const parts = out.stdout.split('\n')
-        // const title = parts[2]
         const checkupdate = yield octokit.checks.update({
             owner: context.payload.repository.owner.login,
             repo: context.payload.repository.name,
             check_run_id: check.data.id,
-            conclusion: 'success',
+            status: 'completed',
+            conclusion: checkFailed ? 'failure' : 'success',
             output: {
                 title: checkFailed ? 'Error' : 'Success',
                 summary
