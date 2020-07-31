@@ -16,6 +16,34 @@ import execa from 'execa'
  * @param {Context} context Context object
  * @return {string[]} Returns the list of files names
  */
+const commitFiles = async (octokit: any, context: any): Promise<string[]> => {
+  try {
+    const listCommitFilesConfig = {
+      owner: context.payload.repository.owner.login,
+      repo: context.payload.repository.name,
+      commit_sha: context.payload.sha
+    }
+
+    const commit = await octokit.git.getCommit(listCommitFilesConfig)
+
+    console.log(
+      'Getting this pr files octokit.pulls.listFiles, listCommitFiles, commit:',
+      listCommitFilesConfig,
+      commit
+    )
+    return commit.files.map((f: any) => f.filename)
+  } catch (error) {
+    console.error('commitFiles error:', error)
+    throw error
+  }
+}
+/**
+ * Get files for a PR
+ *
+ * @param {Github} octokit Octokit package
+ * @param {Context} context Context object
+ * @return {string[]} Returns the list of files names
+ */
 const prFiles = async (octokit: any, context: any): Promise<string[]> => {
   try {
     // TODO -> Investigate why I can not get PR from a commit sha ???
@@ -220,4 +248,4 @@ const isMonorepo = (): boolean => {
   return fs.existsSync(path.join(process.cwd(), 'packages'))
 }
 
-export {prFiles, prPackages, sizeCheck, isMonorepo}
+export {prFiles, commitFiles, prPackages, sizeCheck, isMonorepo}
