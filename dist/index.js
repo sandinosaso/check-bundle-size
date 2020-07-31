@@ -1675,6 +1675,7 @@ const utils_1 = __webpack_require__(611);
 const context = github.context;
 const run = () => __awaiter(void 0, void 0, void 0, function* () {
     console.log(`Running check ...`);
+    console.log(`Context:`, context);
     const myToken = core.getInput('github_token');
     const debug_command = core.getInput('debug_command');
     core.debug(`Build command ${debug_command} ...`);
@@ -8344,7 +8345,7 @@ const prFiles = (octokit, context) => __awaiter(void 0, void 0, void 0, function
         commit_sha: context.sha
     };
     const pr = yield octokit.repos.listPullRequestsAssociatedWithCommit(lprConfig);
-    console.log('Getting this pr files listPullRequestsAssociatedWithCommit, lprConfig, result:', lprConfig, pr, context);
+    console.log('Getting this pr files listPullRequestsAssociatedWithCommit, lprConfig, result:', lprConfig, pr);
     if (pr.data.length === 0) {
         throw new Error(`No PRs associated with commit ${context.payload.sha}`);
     }

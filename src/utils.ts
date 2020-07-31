@@ -27,8 +27,7 @@ const prFiles = async (octokit: any, context: any): Promise<string[]> => {
   console.log(
     'Getting this pr files listPullRequestsAssociatedWithCommit, lprConfig, result:',
     lprConfig,
-    pr,
-    context
+    pr
   )
 
   if (pr.data.length === 0) {

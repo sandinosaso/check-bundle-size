@@ -7,6 +7,7 @@ const context = github.context
 
 const run = async (): Promise<void> => {
   console.log(`Running check ...`)
+  console.log(`Context:`, context)
   const myToken = core.getInput('github_token')
 
   const debug_command: string = core.getInput('debug_command')
