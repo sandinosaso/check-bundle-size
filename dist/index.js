@@ -252,30 +252,6 @@ module.exports._enoent = enoent;
 
 /***/ }),
 
-/***/ 39:
-/***/ (function(module) {
-
-"use strict";
-
-
-const pathKey = (options = {}) => {
-	const environment = options.env || process.env;
-	const platform = options.platform || process.platform;
-
-	if (platform !== 'win32') {
-		return 'PATH';
-	}
-
-	return Object.keys(environment).reverse().find(key => key.toUpperCase() === 'PATH') || 'Path';
-};
-
-module.exports = pathKey;
-// TODO: Remove this for the next major release
-module.exports.default = pathKey;
-
-
-/***/ }),
-
 /***/ 43:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -653,6 +629,30 @@ function parse(val) {
 
   return Math.floor(map[unit] * floatValue);
 }
+
+
+/***/ }),
+
+/***/ 78:
+/***/ (function(module) {
+
+"use strict";
+
+
+const pathKey = (options = {}) => {
+	const environment = options.env || process.env;
+	const platform = options.platform || process.platform;
+
+	if (platform !== 'win32') {
+		return 'PATH';
+	}
+
+	return Object.keys(environment).reverse().find(key => key.toUpperCase() === 'PATH') || 'Path';
+};
+
+module.exports = pathKey;
+// TODO: Remove this for the next major release
+module.exports.default = pathKey;
 
 
 /***/ }),
@@ -1682,7 +1682,7 @@ const run = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         if (utils_1.isMonorepo()) {
             console.log('We are in a monorepo');
-            const changedFiles = yield utils_1.commitFiles(octokit, context);
+            const changedFiles = yield utils_1.prFiles(octokit, context);
             const pkgs = utils_1.prPackages(changedFiles);
             yield Promise.all(pkgs.map((pkg) => __awaiter(void 0, void 0, void 0, function* () { return utils_1.sizeCheck(core, octokit, context, pkg); })));
         }
@@ -2536,7 +2536,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
-var isPlainObject = _interopDefault(__webpack_require__(696));
+var isPlainObject = _interopDefault(__webpack_require__(626));
 var universalUserAgent = __webpack_require__(796);
 
 function lowercaseKeys(object) {
@@ -5884,8 +5884,8 @@ rimraf.sync = rimrafSync
 
 
 const path = __webpack_require__(622);
-const which = __webpack_require__(814);
-const getPathKey = __webpack_require__(39);
+const which = __webpack_require__(968);
+const getPathKey = __webpack_require__(78);
 
 function resolveCommandAttempt(parsed, withoutPathExt) {
     const env = parsed.options.env || process.env;
@@ -7144,6 +7144,50 @@ exports.HttpClient = HttpClient;
 
 /***/ }),
 
+/***/ 548:
+/***/ (function(module) {
+
+"use strict";
+
+
+/*!
+ * is-plain-object <https://github.com/jonschlinkert/is-plain-object>
+ *
+ * Copyright (c) 2014-2017, Jon Schlinkert.
+ * Released under the MIT License.
+ */
+
+function isObject(o) {
+  return Object.prototype.toString.call(o) === '[object Object]';
+}
+
+function isPlainObject(o) {
+  var ctor,prot;
+
+  if (isObject(o) === false) return false;
+
+  // If has modified constructor
+  ctor = o.constructor;
+  if (ctor === undefined) return true;
+
+  // If has modified prototype
+  prot = ctor.prototype;
+  if (isObject(prot) === false) return false;
+
+  // If constructor does not have an Object-specific method
+  if (prot.hasOwnProperty('isPrototypeOf') === false) {
+    return false;
+  }
+
+  // Most likely a plain Object
+  return true;
+}
+
+module.exports = isPlainObject;
+
+
+/***/ }),
+
 /***/ 560:
 /***/ (function(__unusedmodule, exports) {
 
@@ -8363,26 +8407,21 @@ exports.commitFiles = commitFiles;
  */
 const prFiles = (octokit, context) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        // TODO -> Investigate why I can not get PR from a commit sha ???
-        // const lprConfig = {
-        //   owner: context.payload.repository.owner.login,
-        //   repo: context.payload.repository.name,
-        //   commit_sha: context.sha,
-        //   mediaType: {
-        //     previews: [
-        //       'groot'
-        //     ]
-        //   }
-        // }
-        // const pr = await octokit.repos.listPullRequestsAssociatedWithCommit(lprConfig)
-        // console.log(
-        //   'Getting this pr files listPullRequestsAssociatedWithCommit, lprConfig, result:',
-        //   lprConfig,
-        //   pr
-        // )
-        // if (pr.data.length === 0) {
-        //   throw new Error(`No PRs associated with commit ${context.payload.sha}`)
-        // }
+        const lprConfig = {
+            owner: context.payload.repository.owner.login,
+            repo: context.payload.repository.name,
+            commit_sha: context.sha,
+            mediaType: {
+                previews: [
+                    'groot'
+                ]
+            }
+        };
+        const pr = yield octokit.repos.listPullRequestsAssociatedWithCommit(lprConfig);
+        console.log('Getting this pr files listPullRequestsAssociatedWithCommit, lprConfig, result:', lprConfig, pr);
+        if (pr.data.length === 0) {
+            throw new Error(`No PRs associated with commit ${context.payload.sha}`);
+        }
         const listPrFilesConfig = {
             owner: context.payload.repository.owner.login,
             repo: context.payload.repository.name,
@@ -8603,7 +8642,7 @@ module.exports = require("constants");
 "use strict";
 
 const path = __webpack_require__(622);
-const pathKey = __webpack_require__(39);
+const pathKey = __webpack_require__(682);
 
 const npmRunPath = options => {
 	options = {
@@ -8656,6 +8695,50 @@ module.exports.env = options => {
 /***/ (function(module) {
 
 module.exports = require("path");
+
+/***/ }),
+
+/***/ 626:
+/***/ (function(module) {
+
+"use strict";
+
+
+/*!
+ * is-plain-object <https://github.com/jonschlinkert/is-plain-object>
+ *
+ * Copyright (c) 2014-2017, Jon Schlinkert.
+ * Released under the MIT License.
+ */
+
+function isObject(o) {
+  return Object.prototype.toString.call(o) === '[object Object]';
+}
+
+function isPlainObject(o) {
+  var ctor,prot;
+
+  if (isObject(o) === false) return false;
+
+  // If has modified constructor
+  ctor = o.constructor;
+  if (ctor === undefined) return true;
+
+  // If has modified prototype
+  prot = ctor.prototype;
+  if (isObject(prot) === false) return false;
+
+  // If constructor does not have an Object-specific method
+  if (prot.hasOwnProperty('isPrototypeOf') === false) {
+    return false;
+  }
+
+  // Most likely a plain Object
+  return true;
+}
+
+module.exports = isPlainObject;
+
 
 /***/ }),
 
@@ -8921,6 +9004,30 @@ exports.fromPromise = function (fn) {
 
 /***/ }),
 
+/***/ 682:
+/***/ (function(module) {
+
+"use strict";
+
+
+const pathKey = (options = {}) => {
+	const environment = options.env || process.env;
+	const platform = options.platform || process.platform;
+
+	if (platform !== 'win32') {
+		return 'PATH';
+	}
+
+	return Object.keys(environment).reverse().find(key => key.toUpperCase() === 'PATH') || 'Path';
+};
+
+module.exports = pathKey;
+// TODO: Remove this for the next major release
+module.exports.default = pathKey;
+
+
+/***/ }),
+
 /***/ 692:
 /***/ (function(__unusedmodule, exports) {
 
@@ -8965,50 +9072,6 @@ async function outputJson (file, data, options = {}) {
 }
 
 module.exports = outputJson
-
-
-/***/ }),
-
-/***/ 696:
-/***/ (function(module) {
-
-"use strict";
-
-
-/*!
- * is-plain-object <https://github.com/jonschlinkert/is-plain-object>
- *
- * Copyright (c) 2014-2017, Jon Schlinkert.
- * Released under the MIT License.
- */
-
-function isObject(o) {
-  return Object.prototype.toString.call(o) === '[object Object]';
-}
-
-function isPlainObject(o) {
-  var ctor,prot;
-
-  if (isObject(o) === false) return false;
-
-  // If has modified constructor
-  ctor = o.constructor;
-  if (ctor === undefined) return true;
-
-  // If has modified prototype
-  prot = ctor.prototype;
-  if (isObject(prot) === false) return false;
-
-  // If constructor does not have an Object-specific method
-  if (prot.hasOwnProperty('isPrototypeOf') === false) {
-    return false;
-  }
-
-  // Most likely a plain Object
-  return true;
-}
-
-module.exports = isPlainObject;
 
 
 /***/ }),
@@ -9260,7 +9323,7 @@ function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'defau
 
 var endpoint = __webpack_require__(385);
 var universalUserAgent = __webpack_require__(796);
-var isPlainObject = _interopDefault(__webpack_require__(696));
+var isPlainObject = _interopDefault(__webpack_require__(548));
 var nodeFetch = _interopDefault(__webpack_require__(454));
 var requestError = __webpack_require__(463);
 
@@ -9633,138 +9696,6 @@ const createTokenAuth = function createTokenAuth(token) {
 
 exports.createTokenAuth = createTokenAuth;
 //# sourceMappingURL=index.js.map
-
-
-/***/ }),
-
-/***/ 814:
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-const isWindows = process.platform === 'win32' ||
-    process.env.OSTYPE === 'cygwin' ||
-    process.env.OSTYPE === 'msys'
-
-const path = __webpack_require__(622)
-const COLON = isWindows ? ';' : ':'
-const isexe = __webpack_require__(742)
-
-const getNotFoundError = (cmd) =>
-  Object.assign(new Error(`not found: ${cmd}`), { code: 'ENOENT' })
-
-const getPathInfo = (cmd, opt) => {
-  const colon = opt.colon || COLON
-
-  // If it has a slash, then we don't bother searching the pathenv.
-  // just check the file itself, and that's it.
-  const pathEnv = cmd.match(/\//) || isWindows && cmd.match(/\\/) ? ['']
-    : (
-      [
-        // windows always checks the cwd first
-        ...(isWindows ? [process.cwd()] : []),
-        ...(opt.path || process.env.PATH ||
-          /* istanbul ignore next: very unusual */ '').split(colon),
-      ]
-    )
-  const pathExtExe = isWindows
-    ? opt.pathExt || process.env.PATHEXT || '.EXE;.CMD;.BAT;.COM'
-    : ''
-  const pathExt = isWindows ? pathExtExe.split(colon) : ['']
-
-  if (isWindows) {
-    if (cmd.indexOf('.') !== -1 && pathExt[0] !== '')
-      pathExt.unshift('')
-  }
-
-  return {
-    pathEnv,
-    pathExt,
-    pathExtExe,
-  }
-}
-
-const which = (cmd, opt, cb) => {
-  if (typeof opt === 'function') {
-    cb = opt
-    opt = {}
-  }
-  if (!opt)
-    opt = {}
-
-  const { pathEnv, pathExt, pathExtExe } = getPathInfo(cmd, opt)
-  const found = []
-
-  const step = i => new Promise((resolve, reject) => {
-    if (i === pathEnv.length)
-      return opt.all && found.length ? resolve(found)
-        : reject(getNotFoundError(cmd))
-
-    const ppRaw = pathEnv[i]
-    const pathPart = /^".*"$/.test(ppRaw) ? ppRaw.slice(1, -1) : ppRaw
-
-    const pCmd = path.join(pathPart, cmd)
-    const p = !pathPart && /^\.[\\\/]/.test(cmd) ? cmd.slice(0, 2) + pCmd
-      : pCmd
-
-    resolve(subStep(p, i, 0))
-  })
-
-  const subStep = (p, i, ii) => new Promise((resolve, reject) => {
-    if (ii === pathExt.length)
-      return resolve(step(i + 1))
-    const ext = pathExt[ii]
-    isexe(p + ext, { pathExt: pathExtExe }, (er, is) => {
-      if (!er && is) {
-        if (opt.all)
-          found.push(p + ext)
-        else
-          return resolve(p + ext)
-      }
-      return resolve(subStep(p, i, ii + 1))
-    })
-  })
-
-  return cb ? step(0).then(res => cb(null, res), cb) : step(0)
-}
-
-const whichSync = (cmd, opt) => {
-  opt = opt || {}
-
-  const { pathEnv, pathExt, pathExtExe } = getPathInfo(cmd, opt)
-  const found = []
-
-  for (let i = 0; i < pathEnv.length; i ++) {
-    const ppRaw = pathEnv[i]
-    const pathPart = /^".*"$/.test(ppRaw) ? ppRaw.slice(1, -1) : ppRaw
-
-    const pCmd = path.join(pathPart, cmd)
-    const p = !pathPart && /^\.[\\\/]/.test(cmd) ? cmd.slice(0, 2) + pCmd
-      : pCmd
-
-    for (let j = 0; j < pathExt.length; j ++) {
-      const cur = p + pathExt[j]
-      try {
-        const is = isexe.sync(cur, { pathExt: pathExtExe })
-        if (is) {
-          if (opt.all)
-            found.push(cur)
-          else
-            return cur
-        }
-      } catch (ex) {}
-    }
-  }
-
-  if (opt.all && found.length)
-    return found
-
-  if (opt.nothrow)
-    return null
-
-  throw getNotFoundError(cmd)
-}
-
-module.exports = which
-which.sync = whichSync
 
 
 /***/ }),
@@ -12060,6 +11991,138 @@ module.exports = options => {
 
 	return stream;
 };
+
+
+/***/ }),
+
+/***/ 968:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const isWindows = process.platform === 'win32' ||
+    process.env.OSTYPE === 'cygwin' ||
+    process.env.OSTYPE === 'msys'
+
+const path = __webpack_require__(622)
+const COLON = isWindows ? ';' : ':'
+const isexe = __webpack_require__(742)
+
+const getNotFoundError = (cmd) =>
+  Object.assign(new Error(`not found: ${cmd}`), { code: 'ENOENT' })
+
+const getPathInfo = (cmd, opt) => {
+  const colon = opt.colon || COLON
+
+  // If it has a slash, then we don't bother searching the pathenv.
+  // just check the file itself, and that's it.
+  const pathEnv = cmd.match(/\//) || isWindows && cmd.match(/\\/) ? ['']
+    : (
+      [
+        // windows always checks the cwd first
+        ...(isWindows ? [process.cwd()] : []),
+        ...(opt.path || process.env.PATH ||
+          /* istanbul ignore next: very unusual */ '').split(colon),
+      ]
+    )
+  const pathExtExe = isWindows
+    ? opt.pathExt || process.env.PATHEXT || '.EXE;.CMD;.BAT;.COM'
+    : ''
+  const pathExt = isWindows ? pathExtExe.split(colon) : ['']
+
+  if (isWindows) {
+    if (cmd.indexOf('.') !== -1 && pathExt[0] !== '')
+      pathExt.unshift('')
+  }
+
+  return {
+    pathEnv,
+    pathExt,
+    pathExtExe,
+  }
+}
+
+const which = (cmd, opt, cb) => {
+  if (typeof opt === 'function') {
+    cb = opt
+    opt = {}
+  }
+  if (!opt)
+    opt = {}
+
+  const { pathEnv, pathExt, pathExtExe } = getPathInfo(cmd, opt)
+  const found = []
+
+  const step = i => new Promise((resolve, reject) => {
+    if (i === pathEnv.length)
+      return opt.all && found.length ? resolve(found)
+        : reject(getNotFoundError(cmd))
+
+    const ppRaw = pathEnv[i]
+    const pathPart = /^".*"$/.test(ppRaw) ? ppRaw.slice(1, -1) : ppRaw
+
+    const pCmd = path.join(pathPart, cmd)
+    const p = !pathPart && /^\.[\\\/]/.test(cmd) ? cmd.slice(0, 2) + pCmd
+      : pCmd
+
+    resolve(subStep(p, i, 0))
+  })
+
+  const subStep = (p, i, ii) => new Promise((resolve, reject) => {
+    if (ii === pathExt.length)
+      return resolve(step(i + 1))
+    const ext = pathExt[ii]
+    isexe(p + ext, { pathExt: pathExtExe }, (er, is) => {
+      if (!er && is) {
+        if (opt.all)
+          found.push(p + ext)
+        else
+          return resolve(p + ext)
+      }
+      return resolve(subStep(p, i, ii + 1))
+    })
+  })
+
+  return cb ? step(0).then(res => cb(null, res), cb) : step(0)
+}
+
+const whichSync = (cmd, opt) => {
+  opt = opt || {}
+
+  const { pathEnv, pathExt, pathExtExe } = getPathInfo(cmd, opt)
+  const found = []
+
+  for (let i = 0; i < pathEnv.length; i ++) {
+    const ppRaw = pathEnv[i]
+    const pathPart = /^".*"$/.test(ppRaw) ? ppRaw.slice(1, -1) : ppRaw
+
+    const pCmd = path.join(pathPart, cmd)
+    const p = !pathPart && /^\.[\\\/]/.test(cmd) ? cmd.slice(0, 2) + pCmd
+      : pCmd
+
+    for (let j = 0; j < pathExt.length; j ++) {
+      const cur = p + pathExt[j]
+      try {
+        const is = isexe.sync(cur, { pathExt: pathExtExe })
+        if (is) {
+          if (opt.all)
+            found.push(cur)
+          else
+            return cur
+        }
+      } catch (ex) {}
+    }
+  }
+
+  if (opt.all && found.length)
+    return found
+
+  if (opt.nothrow)
+    return null
+
+  throw getNotFoundError(cmd)
+}
+
+module.exports = which
+which.sync = whichSync
 
 
 /***/ }),

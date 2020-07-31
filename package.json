@@ -12,7 +12,7 @@
     "lint": "eslint src/**/*.ts",
     "package": "ncc build --source-map",
     "test": "jest",
-    "all": "npm run build && npm run format && npm run lint && npm run package && npm test"
+    "all": "yarn build && yarn format && yarn lint && yarn package && npm test"
   },
   "repository": {
     "type": "git",
@@ -37,6 +37,7 @@
     "fs-extra": "^9.0.1"
   },
   "devDependencies": {
+    "@octokit/types": "^5.2.0",
     "@types/bytes": "^3.1.0",
     "@types/globby": "^9.1.0",
     "@types/jest": "^26.0.7",

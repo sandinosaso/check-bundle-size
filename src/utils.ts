@@ -5,6 +5,7 @@ import path from 'path'
 import fs from 'fs-extra'
 import bytes from 'bytes'
 import {createGzip} from 'zlib'
+
 // import * as artifact from '@actions/artifact'
 // import globby from 'globby'
 import execa from 'execa'
@@ -46,29 +47,27 @@ const commitFiles = async (octokit: any, context: any): Promise<string[]> => {
  */
 const prFiles = async (octokit: any, context: any): Promise<string[]> => {
   try {
-    // TODO -> Investigate why I can not get PR from a commit sha ???
+    const lprConfig = {
+      owner: context.payload.repository.owner.login,
+      repo: context.payload.repository.name,
+      commit_sha: context.sha,
+      mediaType: {
+        previews: ['groot']
+      }
+    }
+    const pr = await octokit.repos.listPullRequestsAssociatedWithCommit(
+      lprConfig
+    )
 
-    // const lprConfig = {
-    //   owner: context.payload.repository.owner.login,
-    //   repo: context.payload.repository.name,
-    //   commit_sha: context.sha,
-    //   mediaType: {
-    //     previews: [
-    //       'groot'
-    //     ]
-    //   }
-    // }
-    // const pr = await octokit.repos.listPullRequestsAssociatedWithCommit(lprConfig)
+    console.log(
+      'Getting this pr files listPullRequestsAssociatedWithCommit, lprConfig, result:',
+      lprConfig,
+      pr
+    )
 
-    // console.log(
-    //   'Getting this pr files listPullRequestsAssociatedWithCommit, lprConfig, result:',
-    //   lprConfig,
-    //   pr
-    // )
-
-    // if (pr.data.length === 0) {
-    //   throw new Error(`No PRs associated with commit ${context.payload.sha}`)
-    // }
+    if (pr.data.length === 0) {
+      throw new Error(`No PRs associated with commit ${context.payload.sha}`)
+    }
 
     const listPrFilesConfig = {
       owner: context.payload.repository.owner.login,
