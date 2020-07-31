@@ -8444,7 +8444,7 @@ const prPackages = (files) => {
     for (const file of files) {
         if (file.startsWith(baseDir)) {
             const pkgName = file.split('/')[1];
-            const pkgPath = path_1.default.join(process.cwd(), baseDir, pkgName);
+            const pkgPath = path_1.default.join(process.cwd(), pkgName);
             if (!packages.includes(pkgPath)) {
                 packages.push(pkgPath);
             }

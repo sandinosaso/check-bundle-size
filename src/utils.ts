@@ -105,7 +105,7 @@ const prPackages = (files: string[]): string[] => {
   for (const file of files) {
     if (file.startsWith(baseDir)) {
       const pkgName = file.split('/')[1]
-      const pkgPath = path.join(process.cwd(), baseDir, pkgName)
+      const pkgPath = path.join(process.cwd(), pkgName)
       if (!packages.includes(pkgPath)) {
         packages.push(pkgPath)
       }
