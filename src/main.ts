@@ -10,8 +10,7 @@ const run = async (): Promise<void> => {
   console.log(`Context:`, context)
   const myToken = core.getInput('github_token')
 
-  const debug_command: string = core.getInput('debug_command')
-  core.debug(`Build command ${debug_command} ...`)
+  console.log(`Running using myToken: ${myToken}`)
 
   const octokit = github.getOctokit(myToken)
 

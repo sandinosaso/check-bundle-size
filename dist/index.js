@@ -1677,8 +1677,7 @@ const run = () => __awaiter(void 0, void 0, void 0, function* () {
     console.log(`Running check ...`);
     console.log(`Context:`, context);
     const myToken = core.getInput('github_token');
-    const debug_command = core.getInput('debug_command');
-    core.debug(`Build command ${debug_command} ...`);
+    console.log(`Running using myToken: ${myToken}`);
     const octokit = github.getOctokit(myToken);
     try {
         if (utils_1.isMonorepo()) {
