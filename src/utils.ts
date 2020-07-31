@@ -5,10 +5,17 @@ import path from 'path'
 import fs from 'fs-extra'
 import bytes from 'bytes'
 import {createGzip} from 'zlib'
-
 // import * as artifact from '@actions/artifact'
 // import globby from 'globby'
 import execa from 'execa'
+
+import {
+  Endpoints,
+  OctokitResponse,
+  ReposGetCommitResponseData
+} from '@octokit/types'
+
+type listCommitFileParameters = Endpoints['GET /repos/:owner/:repo/commits/:ref']['parameters']
 
 /**
  * Get files for a PR
@@ -19,13 +26,15 @@ import execa from 'execa'
  */
 const commitFiles = async (octokit: any, context: any): Promise<string[]> => {
   try {
-    const listCommitFilesConfig = {
+    const listCommitFilesConfig: listCommitFileParameters = {
       owner: context.payload?.repository?.owner,
       repo: context.payload?.repository?.name,
       ref: context.ref
     }
 
-    const commit = await octokit.repos.getCommit(listCommitFilesConfig)
+    const commit: OctokitResponse<ReposGetCommitResponseData> = await octokit.repos.getCommit(
+      listCommitFilesConfig
+    )
 
     console.log(
       'Getting this commit files octokit.pulls.listFiles, listCommitFiles, commit:',
