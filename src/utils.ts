@@ -106,6 +106,12 @@ const prPackages = (files: string[]): string[] => {
     if (file.startsWith(baseDir)) {
       const pkgName = file.split('/')[1]
       const pkgPath = path.join(process.cwd(), pkgName)
+      console.log(
+        `prPackages file starts with ${baseDir}, process.cwd(), pkgName, pkgPath:`,
+        process.cwd(),
+        pkgName,
+        pkgPath
+      )
       if (!packages.includes(pkgPath)) {
         packages.push(pkgPath)
       }

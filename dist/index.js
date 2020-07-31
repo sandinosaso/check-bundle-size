@@ -8445,6 +8445,7 @@ const prPackages = (files) => {
         if (file.startsWith(baseDir)) {
             const pkgName = file.split('/')[1];
             const pkgPath = path_1.default.join(process.cwd(), pkgName);
+            console.log(`prPackages file starts with ${baseDir}, process.cwd(), pkgName, pkgPath:`, process.cwd(), pkgName, pkgPath);
             if (!packages.includes(pkgPath)) {
                 packages.push(pkgPath);
             }
